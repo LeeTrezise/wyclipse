@@ -8,7 +8,7 @@
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="whiley"
             icon="icons/sample.gif"
-            id="wyclipse.editor.WhileyEditor"
+            id="wyclipse.editor.Editor"
             name="Whiley File Editor">
       </editor>
    </extension>

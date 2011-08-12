@@ -12,6 +12,7 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
 public class Configuration extends SourceViewerConfiguration {
 	private Scanner scanner;
+	private ColorManager manager = new ColorManager();
 	
 	public Configuration() {		
 	}
@@ -20,7 +21,7 @@ public class Configuration extends SourceViewerConfiguration {
 	public IPresentationReconciler getPresentationReconciler(
 			ISourceViewer sourceViewer) {
 		PresentationReconciler pr = new PresentationReconciler();
-		DefaultDamagerRepairer ddr = new DefaultDamagerRepairer(new Scanner());
+		DefaultDamagerRepairer ddr = new DefaultDamagerRepairer(new Scanner(manager));
 		pr.setRepairer(ddr, IDocument.DEFAULT_CONTENT_TYPE);
 		pr.setDamager(ddr, IDocument.DEFAULT_CONTENT_TYPE);
 		return pr;
