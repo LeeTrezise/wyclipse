@@ -28,4 +28,5 @@ public class ColorManager {
 	
 	public static final RGB KEYWORD_COLOR = new RGB(128, 0, 128);
 	public static final RGB DEFAULT_COLOR = new RGB(0, 0, 0);
+	public static final RGB COMMENT_COLOR = new RGB(128, 128, 128);
 }
