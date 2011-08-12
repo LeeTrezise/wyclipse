@@ -44,9 +44,8 @@ public class Scanner implements ITokenScanner {
 	}
 	
 	public void setRange(IDocument document, int offset, int length) {
-		if(offset != 0) {
-			throw new RuntimeException("Wyclipse doesn't know what to do with a non-zero offset");
-		}
+		// At this point, we could be a little smarter and actually update the
+		// token list incrementally.
 		try {
 			String text = document.get();
 			WhileyLexer lexer = new WhileyLexer(new StringReader(text));
