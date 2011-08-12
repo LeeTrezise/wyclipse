@@ -36,6 +36,9 @@ public class Scanner implements ITokenScanner {
 			} else if(token instanceof WhileyLexer.LineComment || token instanceof WhileyLexer.BlockComment) {
 				return new Token(new TextAttribute(
 						manager.getColor(ColorManager.COMMENT_COLOR)));
+			} else if(token instanceof WhileyLexer.Strung) {
+				return new Token(new TextAttribute(
+						manager.getColor(ColorManager.STRING_COLOR)));
 			} else {
 				return new Token(new TextAttribute(
 						manager.getColor(ColorManager.DEFAULT_COLOR)));
