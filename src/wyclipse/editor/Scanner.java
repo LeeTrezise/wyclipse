@@ -51,6 +51,7 @@ public class Scanner implements ITokenScanner {
 		// token list incrementally.
 		try {
 			String text = document.get();
+			System.out.println("DOCUMENT TEXT: " + text.length());
 			WhileyLexer lexer = new WhileyLexer(new StringReader(text));
 			tokens = lexer.scan();
 			pos = 0;
