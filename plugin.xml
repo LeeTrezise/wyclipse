@@ -12,6 +12,26 @@
             name="Whiley File Editor">
       </editor>
    </extension>
+   <extension
+         id="whileyBuilder"
+         name="Whiley Project Builder"
+         point="org.eclipse.core.resources.builders">
+      <builder
+            hasNature="true"></builder>
+   </extension>
+   <extension
+         id="WhileyNature"
+         name="Whiley Nature"
+         point="org.eclipse.core.resources.natures">
+      <runtime>
+         <run
+               class="wyclipse.ProjectNature1">
+         </run>
+      </runtime>
+      <builder
+            id="wyclipse.whileyBuilder">
+      </builder>
+   </extension>
 
 
 </plugin>
