@@ -17,7 +17,10 @@
          name="Whiley Project Builder"
          point="org.eclipse.core.resources.builders">
       <builder
-            hasNature="true"></builder>
+            hasNature="true">
+         <run
+               class="wyclipse.builder.Builder">
+         </run></builder>
    </extension>
    <extension
          id="WhileyNature"
