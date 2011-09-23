@@ -90,9 +90,8 @@ public class Builder extends IncrementalProjectBuilder {
 			compiler.compile(files);
 		} catch(SyntaxError e) {				
 			IFile resource = resourceMap.get(e.filename());
-			if(resource != null) {
-				int line = calculateLineNumber(resource,e.start()); 
-				syntaxError(resource,line,e.msg());
+			if(resource != null) { 
+				highlightSyntaxError(resource,e);
 			}
 			System.out.println("SYNTAX ERROR: " + e);
 		} catch(IOException e) {			
@@ -155,24 +154,13 @@ public class Builder extends IncrementalProjectBuilder {
 		return files;
 	}
 	
-	protected void syntaxError(IResource resource, int line, String msg)
+	protected void highlightSyntaxError(IResource resource, SyntaxError err)
 			throws CoreException {
 		IMarker m = resource.createMarker(IMarker.PROBLEM);
-		m.setAttribute(IMarker.LINE_NUMBER, line);
-		m.setAttribute(IMarker.MESSAGE, msg);
+		m.setAttribute(IMarker.CHAR_START, err.start());
+		m.setAttribute(IMarker.CHAR_END, err.end()+1);
+		m.setAttribute(IMarker.MESSAGE, err.msg());
 		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
 		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-	}
-	
-	/**
-	 * Calculate the line number of a given character in the resource.
-	 * 
-	 * @param resource
-	 * @param index
-	 *            --- character index to compute the line number of.
-	 */
-	protected int calculateLineNumber(IFile resource, int index) throws CoreException {
-		//InputStream in = resource.getContents();
-		return 1;
-	}
+	}	
 }
