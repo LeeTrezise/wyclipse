@@ -1,10 +1,12 @@
 package wyclipse.builder;
 
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
+import org.osgi.framework.Bundle;
 
 import wyc.Compiler;
 import wyc.Pipeline;
@@ -15,14 +17,14 @@ import wyjc.io.ClassFileLoader;
 import wyjc.transforms.ClassWriter;
 
 public class Builder extends IncrementalProjectBuilder {
-		
+	private static final boolean verbose = false;
+	private static final String WYRT_PATH = "lib/wyrt.jar";
+
+	private ArrayList<String> WHILEYPATH;	
 	private ClassFileLoader classFileLoader;
 	private ModuleLoader moduleLoader;
 	private List<Transform> compilerStages;
 	private Compiler compiler;
-	
-	private String BOOTPATH = "lib" + File.separatorChar + "wyrt.jar";
-	private ArrayList<String> WHILEYPATH;
 	
 	public Builder() {
 		initialiseWhileyPath();
@@ -64,7 +66,16 @@ public class Builder extends IncrementalProjectBuilder {
 	
 	protected void initialiseWhileyPath() {
 		this.WHILEYPATH = new ArrayList<String>();
-		this.WHILEYPATH.add(BOOTPATH);
+		// Determine the BOOTHPATH (the path to the Whiley Runtime Jar, wyrt.jar)
+		try {
+			Bundle bundle = Platform.getBundle("wyclipse");
+			URL fileURL = FileLocator.resolve(bundle.getEntry(WYRT_PATH));
+			String BOOTPATH = fileURL.getPath();
+			this.WHILEYPATH.add(BOOTPATH);
+		} catch(IOException e) {
+			// hmmm, what should I do here?
+		}
+						
 	}
 	
 	protected void initialiseCompiler() {		
@@ -74,7 +85,10 @@ public class Builder extends IncrementalProjectBuilder {
 		templates.add(new Pipeline.Template(ClassWriter.class,Collections.EMPTY_MAP));
 		Pipeline pipeline = new Pipeline(templates, moduleLoader);		
 		compilerStages = pipeline.instantiate();
-		compiler = new Compiler(moduleLoader,compilerStages);		
+		compiler = new Compiler(moduleLoader,compilerStages);
+		if(verbose) {
+			compiler.setLogOut(System.err);
+		}
 		moduleLoader.setLogger(compiler);		
 	}
 	
