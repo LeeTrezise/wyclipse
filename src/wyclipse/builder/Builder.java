@@ -24,7 +24,7 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 	
 	protected void fullBuild(IProgressMonitor monitor) {
-		int exitCode = wyjc.Main.run(new String[]{"-V","*.whiley"});
+		int exitCode = wyjc.Main.run(new String[]{"-verbose","*.whiley"});
 		System.out.println("Builder.fullBuilder called --- " + exitCode);
 	}
 	
