@@ -1,16 +1,10 @@
 package wyclipse.builder;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 import org.eclipse.core.resources.*;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.*;
 
 import wyc.Compiler;
 import wyc.Pipeline;
@@ -62,38 +56,11 @@ public class Builder extends IncrementalProjectBuilder {
 		System.out.println("Builder.cleanBuilder called");
 	}
 	
-	protected void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) {		
-		ArrayList<File> deltaFiles = identifyChangedFiles(delta);
-		try {
-			compiler.compile(deltaFiles);
-		} catch(SyntaxError e) {
-			System.out.println("SYNTAX ERROR: " + e);
-		} catch(IOException e) {			
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * This simply compiles the given list of files using the Whiley-to-Java
-	 * compiler.
-	 * 
-	 * @param files
-	 * @param options
-	 */
-	protected void compile(ArrayList<String> files, String... options) {
-		String[] args = new String[files.size()+options.length];
-		for(int i=0;i!=options.length;++i) {
-			args[i] = options[i];
-		}
-		for(int i=0;i!=files.size();++i) {
-			args[i+options.length] = files.get(i);
-		}		
-		try {
-			wyjc.Main.run(args);
-		} catch(SyntaxError error) {
-			
-		}
-	}
+	protected void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) throws CoreException {		
+		ArrayList<IResource> resources = identifyChangedResources(delta);
+		clearMarkers(resources);	
+		compile(identifyCompileableResources(resources));		
+	}		
 	
 	protected void initialiseWhileyPath() {
 		this.WHILEYPATH = new ArrayList<String>();
@@ -111,21 +78,43 @@ public class Builder extends IncrementalProjectBuilder {
 		moduleLoader.setLogger(compiler);		
 	}
 	
+	protected void compile(List<IFile> compileableResources) throws CoreException {
+		HashMap<String,IFile> resourceMap = new HashMap<String,IFile>();
+		try {
+			ArrayList<File> files = new ArrayList<File>();
+			for(IFile resource : compileableResources) {
+				File file = resource.getRawLocation().toFile();
+				files.add(file);
+				resourceMap.put(file.getAbsolutePath(), resource);
+			}
+			compiler.compile(files);
+		} catch(SyntaxError e) {				
+			IFile resource = resourceMap.get(e.filename());
+			if(resource != null) {
+				int line = calculateLineNumber(resource,e.start()); 
+				syntaxError(resource,line,e.msg());
+			}
+			System.out.println("SYNTAX ERROR: " + e);
+		} catch(IOException e) {			
+			e.printStackTrace();
+		}
+	}
+	
 	/**
-	 * This simply recurses the delta and strips out the files which have
-	 * changed, and that can be recompiled.
+	 * This simply recurses the delta and strips out the resources which have
+	 * changed.
 	 * 
 	 * @param delta
 	 * @return
 	 */
-	protected ArrayList<File> identifyChangedFiles(IResourceDelta delta) {
-		final ArrayList<File> files = new ArrayList<File>();
+	protected ArrayList<IResource> identifyChangedResources(IResourceDelta delta) {
+		final ArrayList<IResource> files = new ArrayList<IResource>();
 		try {
 			delta.accept(new IResourceDeltaVisitor() {
 				public boolean visit(IResourceDelta delta) {
-					IPath file = delta.getResource().getRawLocation();
-					if(file != null) {						
-						files.add(file.toFile());
+					IResource resource = delta.getResource();
+					if(resource != null) {						
+						files.add(resource);
 					}
 					return true; // visit children as well.
 				}
@@ -134,5 +123,56 @@ public class Builder extends IncrementalProjectBuilder {
 			e.printStackTrace();
 		}	
 		return files;
+	}
+	
+	/**
+	 * Remove all markers on those resources to be compiled.
+	 * @param resources
+	 * @throws CoreException
+	 */
+	protected void clearMarkers(List<IResource> resources) throws CoreException {
+		for (IResource resource : resources) {
+			resource.deleteMarkers(IMarker.PROBLEM, true, IResource.DEPTH_INFINITE);
+		}
+	}
+	
+	/**
+	 * Identify those resources which have changed, and which are allowed to be
+	 * compiled. Resources which cannot be compiled include those which are not
+	 * source files, or are not located in a designated source folder.
+	 * 
+	 * @param resources
+	 * @return
+	 */
+	protected ArrayList<IFile> identifyCompileableResources(List<IResource> resources) {
+		ArrayList<IFile> files = new ArrayList<IFile>();
+		for (IResource resource : resources) {
+			if (resource.getType() == IResource.FILE
+					&& resource.getFileExtension().equals("whiley")) {
+				files.add((IFile)resource);
+			}
+		}
+		return files;
+	}
+	
+	protected void syntaxError(IResource resource, int line, String msg)
+			throws CoreException {
+		IMarker m = resource.createMarker(IMarker.PROBLEM);
+		m.setAttribute(IMarker.LINE_NUMBER, line);
+		m.setAttribute(IMarker.MESSAGE, msg);
+		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
+		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+	}
+	
+	/**
+	 * Calculate the line number of a given character in the resource.
+	 * 
+	 * @param resource
+	 * @param index
+	 *            --- character index to compute the line number of.
+	 */
+	protected int calculateLineNumber(IFile resource, int index) throws CoreException {
+		//InputStream in = resource.getContents();
+		return 1;
 	}
 }
