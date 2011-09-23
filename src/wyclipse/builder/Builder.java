@@ -103,11 +103,8 @@ public class Builder extends IncrementalProjectBuilder {
 			}
 			compiler.compile(files);
 		} catch(SyntaxError e) {				
-			IFile resource = resourceMap.get(e.filename());
-			if(resource != null) { 
-				highlightSyntaxError(resource,e);
-			}
-			System.out.println("SYNTAX ERROR: " + e);
+			IFile resource = resourceMap.get(e.filename());			
+			highlightSyntaxError(resource,e);				
 		} catch(IOException e) {			
 			e.printStackTrace();
 		}
