@@ -35,6 +35,40 @@
             id="wyclipse.whileyBuilder">
       </builder>
    </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            description="Create a new Whiley Module."
+            id="wyclipse.newModuleActionSet"
+            label="Whiley Module"
+            visible="true">
+         <menu
+               id="wyclipse.newModuleMenu"
+               label="Whiley Module">
+         </menu>
+         <action
+               class="wyclipse.actions.OpenNewModuleView"
+               id="wyclipse.newModuleAction"
+               label="Whiley Module"
+               menubarPath="file/new/new.ext"
+               pulldown="true"
+               style="push">
+         </action>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <viewerContribution
+            id="wyclipse.navigatorNewModule"
+            targetID="org.eclipse.ui.views.ResourceNavigator">
+         <action
+               class="wyclipse.actions.OpenNewModuleView"
+               id="wyclipse.navigatorNewModule"
+               label="Whiley Module"
+               menubarPath="new/additions">
+         </action>
+      </viewerContribution>
+   </extension>
 
 
 </plugin>
