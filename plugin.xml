@@ -73,7 +73,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:file.new?after=open.ext">
+            locationURI="menu:new?after=project.ext">
          <command
                commandId="org.eclipse.ant.ui.antShortcut.run"
                label="THIS IS A COMMAND"
