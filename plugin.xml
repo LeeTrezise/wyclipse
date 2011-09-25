@@ -49,8 +49,8 @@
          <action
                class="wyclipse.actions.OpenNewModuleView"
                id="wyclipse.newModuleAction"
-               label="Whiley Module"
-               menubarPath="file/new/new.ext"
+               label="Module"
+               menubarPath="file/new/group.top"
                pulldown="true"
                style="push">
          </action>
@@ -65,9 +65,21 @@
                class="wyclipse.actions.OpenNewModuleView"
                id="wyclipse.navigatorNewModule"
                label="Whiley Module"
-               menubarPath="new/additions">
+               menubarPath="edit">
          </action>
       </viewerContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:file.new?after=open.ext">
+         <command
+               commandId="org.eclipse.ant.ui.antShortcut.run"
+               label="THIS IS A COMMAND"
+               style="push">
+         </command>
+      </menuContribution>
    </extension>
 
 
