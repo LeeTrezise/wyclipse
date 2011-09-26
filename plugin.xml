@@ -46,6 +46,7 @@
       <wizard
             category="wyclipse.whileyCategory"
             class="wyclipse.wizards.NewModuleWizard"
+            icon="icons/newmodule_wiz.gif"
             id="wyclipse.newModuleWizard"
             name="Module"
             project="false">
