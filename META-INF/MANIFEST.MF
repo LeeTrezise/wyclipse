@@ -8,12 +8,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
-<<<<<<< HEAD
- org.eclipse.core.resources;bundle-version="3.7.100",
- org.eclipse.ui.ide
-=======
  org.eclipse.core.resources;bundle-version="3.6.0"
->>>>>>> 193150fbee95ea064a1387542da083671b8f72bd
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: lib/wyjc.jar,
