@@ -60,12 +60,12 @@
          point="org.eclipse.ui.popupMenus">
       <viewerContribution
             id="wyclipse.navigatorNewModule"
-            targetID="org.eclipse.ui.views.ResourceNavigator">
+            targetID="org.eclipse.jdt.ui.PackageExplorer">
          <action
                class="wyclipse.actions.OpenNewModuleView"
                id="wyclipse.navigatorNewModule"
                label="Whiley Module"
-               menubarPath="edit">
+               menubarPath="file/new">
          </action>
       </viewerContribution>
    </extension>
@@ -73,13 +73,27 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:new?after=project.ext">
+            locationURI="menu:org.eclipse.jdt.ui.PackageExplorer?after=additions">
          <command
                commandId="org.eclipse.ant.ui.antShortcut.run"
-               label="THIS IS A COMMAND"
+               label="Module"
                style="push">
          </command>
       </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="wyclipse"
+            name="Sample Wizards">
+      </category>
+      <wizard
+            category="wyclipse"
+            class="wyclipse.wizards.NewModuleWizard"
+            icon="icons/sample.gif"
+            id="wyclipse.wizards.WhileyModuleNewWizard"
+            name="Multi-page Editor file">
+      </wizard>
    </extension>
 
 
