@@ -2,14 +2,46 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Wyclipse
 Bundle-SymbolicName: wyclipse;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.0.1
 Bundle-Activator: wyclipse.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.ui.editors,
- org.eclipse.core.resources;bundle-version="3.7.100"
+ org.eclipse.core.resources;bundle-version="3.6.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: lib/wyjc.jar,
  .
+Export-Package: wyautl,
+ wyautl.io,
+ wyautl.lang,
+ wyautl.util,
+ wyc,
+ wyc.lang,
+ wyc.stages,
+ wyc.util,
+ wyclipse,
+ wyclipse.actions,
+ wyclipse.builder,
+ wyclipse.editor,
+ wyclipse.wizards,
+ wyil,
+ wyil.lang,
+ wyil.testing,
+ wyil.transforms,
+ wyil.util,
+ wyil.util.dfa,
+ wyil.util.type,
+ wyjc,
+ wyjc.attributes,
+ wyjc.io,
+ wyjc.runtime,
+ wyjc.testing,
+ wyjc.testing.tests,
+ wyjc.transforms,
+ wyjc.util,
+ wyjvm.attributes,
+ wyjvm.io,
+ wyjvm.lang,
+ wyjvm.util
