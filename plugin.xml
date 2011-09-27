@@ -48,9 +48,23 @@
             class="wyclipse.wizards.NewModuleWizard"
             icon="icons/newmodule_wiz.gif"
             id="wyclipse.newModuleWizard"
-            name="Module"
+            name="Whiley Module"
             project="false">
       </wizard>
+      <primaryWizard
+            id="wyclipse.newModuleWizard">
+      </primaryWizard>
+      <wizard
+            category="wyclipse.whileyCategory"
+            class="wyclipse.wizards.NewProjectWizard"
+            icon="icons/newwprj_wiz.gif"
+            id="wyclipse.newProjectWizard"
+            name="Whiley Project"
+            project="true">
+      </wizard>
+      <primaryWizard
+            id="wyclipse.newProjectWizard">
+      </primaryWizard>
    </extension>
 
 
