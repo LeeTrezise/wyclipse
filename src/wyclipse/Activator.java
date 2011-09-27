@@ -18,6 +18,8 @@ public class Activator extends AbstractUIPlugin {
 	// builder ID
 	public static final String WYCLIPSE_BUILDER_ID = "wyclipse.whileybuilder";
 
+	// marker ID
+	public static final String WYCLIPSE_MARKER_ID = "wyclipse.whileymarker";
 	
 	// The shared instance
 	private static Activator plugin;

@@ -10,6 +10,7 @@ import org.osgi.framework.Bundle;
 
 import wyc.Compiler;
 import wyc.Pipeline;
+import wyclipse.Activator;
 import wyil.ModuleLoader;
 import wyil.Transform;
 import wyil.util.SyntaxError;
@@ -166,12 +167,14 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 	
 	protected void highlightSyntaxError(IResource resource, SyntaxError err)
-			throws CoreException {
-		IMarker m = resource.createMarker(IMarker.PROBLEM);
+			throws CoreException {		
+		//IMarker m = resource.createMarker(IMarker.PROBLEM);		
+		IMarker m = resource.createMarker(Activator.WYCLIPSE_MARKER_ID);
 		m.setAttribute(IMarker.CHAR_START, err.start());
 		m.setAttribute(IMarker.CHAR_END, err.end()+1);
 		m.setAttribute(IMarker.MESSAGE, err.msg());
 		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
 		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+		
 	}	
 }

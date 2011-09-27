@@ -9,6 +9,5 @@ public class Editor extends TextEditor {
 	}
 	public void dispose() {
 		super.dispose();
-	}
-
+	}	
 }
