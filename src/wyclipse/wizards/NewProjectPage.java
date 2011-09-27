@@ -1,23 +1,20 @@
 package wyclipse.wizards;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+import java.io.*;
+import java.net.URL;
+
+import org.eclipse.core.resources.*;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.*;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.*;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 /**
@@ -101,8 +98,11 @@ public class NewProjectPage extends WizardPage {
 		}
 	}
 	
-	private void initialiseLocation() {
-		// Need to figure out how determine the default location
+	private void initialiseLocation() {		
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+		//URL path = FileLocator.resolve(new URL("workspace:/"));
+		IPath path = root.getRawLocation();
+		location.setText(path.toOSString());		
 	}
 	
 	public String getLocation() {

@@ -13,7 +13,7 @@
       </editor>
    </extension>
    <extension
-         id="whileyBuilder"
+         id="whileybuilder"
          name="Whiley Project Builder"
          point="org.eclipse.core.resources.builders">
       <builder
@@ -23,17 +23,17 @@
          </run></builder>
    </extension>
    <extension
-         id="WhileyNature"
+         id="whileynature"
          name="Whiley Nature"
          point="org.eclipse.core.resources.natures">
+      <builder
+            id="wyclipse.whileybuilder">
+      </builder>
       <runtime>
          <run
-               class="wyclipse.ProjectNature1">
+               class="wyclipse.natures.WhileyNature">
          </run>
       </runtime>
-      <builder
-            id="wyclipse.whileyBuilder">
-      </builder>
    </extension>
    <extension
          id="WhileyNewWizard"

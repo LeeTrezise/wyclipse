@@ -12,6 +12,13 @@ public class Activator extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "wyclipse"; //$NON-NLS-1$
 
+	// nature ID
+	public static final String WYCLIPSE_NATURE_ID = "wyclipse.whileynature";
+
+	// builder ID
+	public static final String WYCLIPSE_BUILDER_ID = "wyclipse.whileybuilder";
+
+	
 	// The shared instance
 	private static Activator plugin;
 	
