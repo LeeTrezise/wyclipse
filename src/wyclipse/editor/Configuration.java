@@ -1,7 +1,9 @@
 package wyclipse.editor;
 
+import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
+import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
@@ -24,6 +26,10 @@ public class Configuration extends SourceViewerConfiguration {
 		DefaultDamagerRepairer ddr = new DefaultDamagerRepairer(new Scanner(manager));
 		pr.setRepairer(ddr, IDocument.DEFAULT_CONTENT_TYPE);
 		pr.setDamager(ddr, IDocument.DEFAULT_CONTENT_TYPE);
-		return pr;
+		return pr;		
+	}
+	
+	public ITextHover getTextHover(ISourceViewer sv, String contentType) {
+		return new DefaultTextHover(sv);		
 	}
 }
