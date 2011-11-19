@@ -68,6 +68,7 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 	 * the wizard. We will create an operation and run it
 	 * using wizard as execution context.
 	 */
+	@Override
 	public boolean performFinish() {
 		boolean result = super.performFinish();
 		if(result) {
@@ -88,4 +89,10 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 		}
 		return result;
 	}
+	
+	@Override
+    public boolean performCancel() {
+        page2.performCancel();
+        return super.performCancel();
+    }
 }
