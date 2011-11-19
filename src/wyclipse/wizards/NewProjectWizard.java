@@ -17,15 +17,20 @@ import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 import java.io.*;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
+import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
+
 import org.eclipse.ui.*;
 import org.eclipse.ui.ide.IDE;
 
 import wyclipse.Activator;
 
-public class NewProjectWizard extends Wizard implements INewWizard {
-	private NewProjectPage page;
-	private ISelection selection;
-
+public class NewProjectWizard extends NewElementWizard implements IExecutableExtension {
+	private NewProjectPage page1;
+	private NewJavaProjectWizardPageTwo page2;
+	private ISelection selection;	
+	
 	/**
 	 * Constructor for WhileyModuleNewWizard.
 	 */
@@ -39,18 +44,33 @@ public class NewProjectWizard extends Wizard implements INewWizard {
 	 */
 
 	public void addPages() {
-		page = new NewProjectPage(selection);
-		addPage(page);
+		page1 = new NewProjectPage(selection);
+		addPage(page1);
+		addPage(page2);
+	}
+	
+	public IJavaElement getCreatedElement() {
+		return page2.getJavaProject();
 	}
 
+	public void finishPage(IProgressMonitor monitor)
+			throws InterruptedException, CoreException {
+		page2.performFinish(monitor);
+	}
+	
+	public void setInitializationData(IConfigurationElement config,
+			String property, Object data) {
+		// do nout for now
+	}
+	
 	/**
 	 * This method is called when 'Finish' button is pressed in
 	 * the wizard. We will create an operation and run it
 	 * using wizard as execution context.
 	 */
 	public boolean performFinish() {
-		final String projectName = page.getProjectName();
-		final String location = page.getLocation();
+		final String projectName = page1.getProjectName();
+		final String location = page1.getLocation();
 		IRunnableWithProgress op = new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
