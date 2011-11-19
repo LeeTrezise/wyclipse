@@ -52,7 +52,7 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 	
 	protected void fullBuild(IProgressMonitor monitor) {
-		//compile(files,"-bp",PATH_TO_STDLIB);
+		//compile(identifyCompileableResources(resources));
 	}
 	
 	protected void cleanBuild(IProgressMonitor monitor) {

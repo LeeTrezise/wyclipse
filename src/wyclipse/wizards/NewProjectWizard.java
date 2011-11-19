@@ -1,5 +1,7 @@
 package wyclipse.wizards;
 
+import java.util.Arrays;
+
 import org.eclipse.core.runtime.*;
 
 import org.eclipse.jface.viewers.ISelection;
@@ -36,9 +38,8 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 	}
 	
 	/**
-	 * Adding the page to the wizard.
+	 * Add pages to the wizard.
 	 */
-
 	public void addPages() {
 		page1 = new NewJavaProjectWizardPageOne();
 		page2 = new NewJavaProjectWizardPageTwo(page1);
@@ -64,9 +65,7 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 	}
 	
 	/**
-	 * This method is called when 'Finish' button is pressed in
-	 * the wizard. We will create an operation and run it
-	 * using wizard as execution context.
+	 * This method is called when 'Finish' button is pressed in the wizard.
 	 */
 	@Override
 	public boolean performFinish() {
@@ -78,10 +77,24 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 			try {
 				IProject project = page2.getJavaProject().getProject();
 				IProjectDescription desc = project.getDescription();
-				desc.setNatureIds(new String[] { Activator.WYCLIPSE_NATURE_ID });
+				
+				// First, append Whiley Nature onto list of natures
+				String[] oldNatures = desc.getNatureIds();
+				String[] newNatures = Arrays.copyOf(oldNatures, oldNatures.length+1);
+				newNatures[oldNatures.length] = Activator.WYCLIPSE_NATURE_ID;							
+				desc.setNatureIds(newNatures);
+
+				// Second, append Whiley Builder onto list of builders
+				ICommand[] oldBuilders = desc.getBuildSpec();
+				ICommand[] newBuilders = Arrays.copyOf(oldBuilders, oldBuilders.length+1);
 				ICommand buildCommand = desc.newCommand();
+				// TODO: is the ordering here important? We definitely want wyjc
+				// to run first.
 				buildCommand.setBuilderName(Activator.WYCLIPSE_BUILDER_ID);
-				desc.setBuildSpec(new ICommand[] { buildCommand });		
+				newBuilders[oldBuilders.length] = buildCommand;
+				desc.setBuildSpec(newBuilders);		
+				
+				// done
 				project.setDescription(desc,null);
 			} catch(CoreException e) {
 				return false; // I guess??
@@ -90,6 +103,10 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 		return result;
 	}
 	
+	/**
+	 * This method is called when 'Cancel' button is pressed in the wizard. In
+	 * this case, we need to undo what has been done.
+	 */	
 	@Override
     public boolean performCancel() {
         page2.performCancel();
