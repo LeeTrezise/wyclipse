@@ -90,9 +90,14 @@
          point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             delegate="wyclipse.launchers.WhileyLauncher"
-            id="wyclipse.whileylaunchconfig"
+            delegateDescription="Run a Whiley Application"
+            delegateName="Whiley Application Launcher"
+            id="wyclipse.whileyLaunchConfiguration"
             modes="run"
-            name="Whiley Application">
+            name="Whiley Application"
+            public="true"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
       </launchConfigurationType>
    </extension>
    <extension
@@ -152,6 +157,14 @@
             name="Whiley Text File"
             priority="low">
       </content-type>
+   </extension>
+   <extension
+         point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+      <launchConfigurationTabGroup
+            class="wyclipse.launchers.WhileyLauncherTabGroup"
+            id="wyclipse.whileyLaunchConfigurationTabGroup"
+            type="wyclipse.whileyLaunchConfiguration">
+      </launchConfigurationTabGroup>
    </extension>
 
 
