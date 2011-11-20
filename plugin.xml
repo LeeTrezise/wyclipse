@@ -7,9 +7,12 @@
             class="wyclipse.editor.Editor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="whiley"
-            icon="icons/sample.gif"
-            id="wyclipse.editor.Editor"
-            name="Whiley File Editor">
+            icon="icons/whiley_file.gif"
+            id="whileyEditor"
+            name="Whiley Source File Editor">
+         <contentTypeBinding
+               contentTypeId="wyclipse.whileySource">
+         </contentTypeBinding>
       </editor>
    </extension>
    <extension
@@ -34,6 +37,12 @@
                class="wyclipse.natures.WhileyNature">
          </run>
       </runtime>
+      <requires-nature
+            id="org.eclipse.jdt.core.javanature">
+      </requires-nature>
+      <content-type
+            id="wyclipse.whileySource">
+      </content-type>
    </extension>
    <extension
          id="WhileyNewWizard"
@@ -126,6 +135,23 @@
             name="Wyil Files"
             pattern="*.wyil">
       </filter>
+   </extension>
+   <extension
+         point="org.eclipse.core.contenttype.contentTypes">
+      <content-type
+            base-type="org.eclipse.jdt.core.javaSource"
+            file-extensions="whiley"
+            id="whileySource"
+            name="Whiley Source File"
+            priority="high">
+      </content-type>
+      <content-type
+            base-type="org.eclipse.core.runtime.text"
+            file-extensions="whiley"
+            id="wyclipse.whileyText"
+            name="Whiley Text File"
+            priority="low">
+      </content-type>
    </extension>
 
 
