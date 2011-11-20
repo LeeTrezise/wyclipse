@@ -1,29 +1,33 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Wyclipse
-Bundle-SymbolicName: wyclipse;singleton:=true
-Bundle-Version: 0.0.3
-Bundle-Activator: wyclipse.Activator
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.eclipse.jface.text,
- org.eclipse.ui.editors,
- org.eclipse.core.resources;bundle-version="3.6.0",
- org.eclipse.ui.ide;bundle-version="3.6.1",
- org.eclipse.debug.core;bundle-version="3.6.0",
- org.eclipse.jdt.ui;bundle-version="3.7.0",
- org.eclipse.jdt.core;bundle-version="3.7.0",
- org.eclipse.ui.navigator;bundle-version="3.5.100",
- org.eclipse.jdt.launching;bundle-version="3.6.0",
- org.eclipse.debug.ui;bundle-version="3.7.0",
- org.eclipse.jdt.debug;bundle-version="3.7.0",
- org.eclipse.jdt.debug.ui;bundle-version="3.6.0"
-Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-SymbolicName: wyclipse
+Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: lib/wyjc.jar,
  .
+Bundle-Activator: wyclipse.Activator
 Export-Package: wyclipse,
  wyclipse.actions,
  wyclipse.builder,
  wyclipse.editor,
+ wyclipse.launchers,
+ wyclipse.natures,
  wyclipse.wizards
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text,
+ org.eclipse.ui.editors,
+ org.eclipse.core.resources;bundle-version="3.5.0",
+ org.eclipse.ui.ide;bundle-version="3.5.0",
+ org.eclipse.debug.core;bundle-version="3.5.0",
+ org.eclipse.jdt.ui;bundle-version="3.5.0",
+ org.eclipse.jdt.core;bundle-version="3.5.0",
+ org.eclipse.ui.navigator;bundle-version="3.5.0",
+ org.eclipse.jdt.launching;bundle-version="3.5.0",
+ org.eclipse.debug.ui;bundle-version="3.5.0",
+ org.eclipse.jdt.debug;bundle-version="3.5.0",
+ org.eclipse.jdt.debug.ui;bundle-version="3.5.0",
+ org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
