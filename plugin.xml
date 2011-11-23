@@ -9,7 +9,7 @@
 	<extension
 		point="org.eclipse.ui.perspectives">
 	<perspective
-		name =" Wyclipse"
+		name ="Whiley"
 		class="wyclipse.perspective.Perspective"
 		id="org.eclipse.ui.articles.perspective.Whiley"
 		icon="icons/whiley_file.gif">
