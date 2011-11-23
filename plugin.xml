@@ -63,7 +63,7 @@
 <extension point="org.eclipse.ui.newWizards">
 	 <category
             id="wyclipse.WhileyCategory"
-            name="Wyclipse"
+            name="Whiley"
             visible="true">
     </category>
    	<wizard
