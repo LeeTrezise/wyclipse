@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
-<plugin>
-   <extension
+<plugin
+	id="org.eclipse.ui.articles.perspective"
+	name="Wyclipse"
+	version="0.0.3">
+
+				
+	<extension
+		point="org.eclipse.ui.perspectives">
+	<perspective
+		name ="Whiley"
+		class="wyclipse.perspective.Perspective"
+		id="org.eclipse.ui.articles.perspective.Whiley"
+		icon="icons/whiley_file.gif">
+	</perspective>
+	</extension>
+  <extension
          point="org.eclipse.ui.editors">
       <editor
             class="wyclipse.editor.Editor"
@@ -15,6 +29,7 @@
          </contentTypeBinding>
       </editor>
    </extension>
+   
    <extension
          id="whileybuilder"
          name="Whiley Project Builder"
@@ -44,37 +59,41 @@
             id="wyclipse.whileySource">
       </content-type>
    </extension>
-   <extension
-         id="WhileyNewWizard"
-         name="Whiley New Module Wizard"
-         point="org.eclipse.ui.newWizards">
-      <category
-            id="wyclipse.whileyCategory"
-            name="Whiley">
-      </category>
-      <wizard
-            category="wyclipse.whileyCategory"
+
+<extension point="org.eclipse.ui.newWizards">
+	 <category
+            id="wyclipse.WhileyCategory"
+            name="Whiley"
+            visible="true">
+    </category>
+   	<wizard
+            category="wyclipse.WhileyCategory"
             class="wyclipse.wizards.NewModuleWizard"
             icon="icons/newmodule_wiz.gif"
+           
+            hasPages="true"
             id="wyclipse.newModuleWizard"
             name="Whiley Module"
-            project="false">
-      </wizard>
-      <primaryWizard
-            id="wyclipse.newModuleWizard">
-      </primaryWizard>
-      <wizard
-            category="wyclipse.whileyCategory"
+           
+            project="false"
+            visible="true">
+            
+            
+      </wizard>	
+       <wizard
+            category="wyclipse.WhileyCategory"
             class="wyclipse.wizards.NewProjectWizard"
             icon="icons/newwprj_wiz.gif"
-            id="wyclipse.newProjectWizard"
+            finalPerspective="wyclipse.perspective.Perspective"
+            hasPages="true"
+             id="wyclipse.newProjectWizard"
             name="Whiley Project"
-            project="true">
-      </wizard>
-      <primaryWizard
-            id="wyclipse.newProjectWizard">
-      </primaryWizard>
-   </extension>
+            preferredPerspectives="wyclipse.perspective.Perspective"
+            project="false"
+            visible="true">
+       </wizard>	
+ </extension>
+ 
    <extension
          id="whileymarker"
          name="Whiley Syntax Marker"
@@ -100,6 +119,24 @@
             sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
       </launchConfigurationType>
    </extension>
+   <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+		<launchConfigurationTypeImage
+			icon ="icons/whiley_file.gif"
+			configTypeID="wyclipse.whileyLaunchConfiguration"
+			id="wyclipse.launch.launchProgram">
+		</launchConfigurationTypeImage>
+	</extension>
+	<extension point="org.eclipse.debug.ui.launchShortcuts">
+		<shortcut
+		id = "wyclipse.launch.launchProgram"
+		class="wyclipse.launch.LaunchShortcut"
+		label="Whiley Launch"
+		icon="icons/whiley_file.gif"
+		modes="run">
+			<perspective id ="org.eclipse.jdt.ui.JavaPerspective"/>
+		</shortcut>
+	</extension>
+		
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <commonFilter
@@ -166,6 +203,20 @@
             type="wyclipse.whileyLaunchConfiguration">
       </launchConfigurationTabGroup>
    </extension>
-
-
+	<extension point = "org.eclipse.ui.actionSets">
+		<actionSet
+			id = "wyclipse.Run"
+			label = "Whiley"
+			visible ="false">
+			<action
+				id = "wyclipse.Run.run"
+				label="Run Whiley"
+				icon = "icons/whiley_file.gif"
+				tooltip="Run as a Whiley Program"
+				toolbarPath="Normal/additions"
+				class="wyclipse.Run.Rundelegate">
+			</action>
+		</actionSet>
+	</extension>
+	
 </plugin>
