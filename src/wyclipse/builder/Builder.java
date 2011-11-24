@@ -45,19 +45,42 @@ public class Builder extends IncrementalProjectBuilder {
 			} else {
 				incrementalBuild(delta,monitor);
 			}
-		} else if(kind == IncrementalProjectBuilder.CLEAN_BUILD) {
-			cleanBuild(monitor);
-			fullBuild(monitor);
-		}
+		} 
 		return null;
 	}
 	
-	protected void fullBuild(IProgressMonitor monitor) {
+	protected void fullBuild(IProgressMonitor monitor) throws CoreException {
+		IProject project = getProject();
+		for(IResource r : project.members()) {
+			
+		}
 		//compile(identifyCompileableResources(resources));
 	}
 	
-	protected void cleanBuild(IProgressMonitor monitor) {
-		System.out.println("Builder.cleanBuilder called");
+	protected void clean(IProgressMonitor monitor) throws CoreException {
+		IProject project = getProject();		
+		IWorkspace workspace = project.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
+		IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+		
+		// =====================================================
+		// first, delete everything in the default output folder
+		// =====================================================		
+		IPath defaultOutputLocation = javaProject.getOutputLocation();		
+		IFolder defaultOutputContainer = workspaceRoot.getFolder(defaultOutputLocation);		
+		
+		if(defaultOutputContainer != null) {
+			for(IResource r : defaultOutputContainer.members()) {				
+				r.delete(true, monitor);
+			}
+		}
+		
+		// ========================================================
+		// second, delete everything in the specific output folders.
+		// ========================================================
+				
+		// TODO
+		
 	}
 	
 	protected void incrementalBuild(IResourceDelta delta, IProgressMonitor monitor) throws CoreException {		
@@ -101,6 +124,7 @@ public class Builder extends IncrementalProjectBuilder {
 		ArrayList<String> sourcepath = new ArrayList<String>();
 		IProject project = (IProject) getProject();
 		IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+		System.out.println("DEFAULT OUTPUT LOCATIOT: " + javaProject.getOutputLocation());
 		
 		if(javaProject != null) {
 			for(IClasspathEntry e : javaProject.getRawClasspath()) {
@@ -110,6 +134,7 @@ public class Builder extends IncrementalProjectBuilder {
 						break;
 					case IClasspathEntry.CPE_SOURCE:
 						System.out.println("ADDING SOURCE DIR: " + e.toString());
+						System.out.println("OUTPUT LOCATION: " + e.getOutputLocation());
 						break;
 					case IClasspathEntry.CPE_CONTAINER:
 						System.out.println("ADDING CONTAINER?: " + e.toString());
