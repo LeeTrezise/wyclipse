@@ -6,6 +6,7 @@ import java.util.*;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.*;
+import org.eclipse.jdt.core.*;
 import org.osgi.framework.Bundle;
 
 import wyc.Compiler;
@@ -94,14 +95,38 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 	
 	protected void compile(List<IFile> compileableResources) throws CoreException {
+		
+		// Construct CLASSPATH and SOURCEPATHs
+		ArrayList<String> classpath = new ArrayList<String>();
+		ArrayList<String> sourcepath = new ArrayList<String>();
+		IProject project = (IProject) getProject();
+		IJavaProject javaProject = (IJavaProject) project.getNature(JavaCore.NATURE_ID);
+		
+		if(javaProject != null) {
+			for(IClasspathEntry e : javaProject.getRawClasspath()) {
+				switch(e.getEntryKind()) {
+					case IClasspathEntry.CPE_LIBRARY:
+						System.out.println("ADDING JAR FILE: " + e.toString());
+						break;
+					case IClasspathEntry.CPE_SOURCE:
+						System.out.println("ADDING SOURCE DIR: " + e.toString());
+						break;
+					case IClasspathEntry.CPE_CONTAINER:
+						System.out.println("ADDING CONTAINER?: " + e.toString());
+						break;
+				}				
+			}
+		}
+				
 		HashMap<String,IFile> resourceMap = new HashMap<String,IFile>();
 		try {
 			ArrayList<File> files = new ArrayList<File>();
 			for(IFile resource : compileableResources) {
 				File file = resource.getRawLocation().toFile();
 				files.add(file);
+				System.out.println("COMPILING: " + file);
 				resourceMap.put(file.getAbsolutePath(), resource);
-			}
+			}			
 			compiler.compile(files);
 		} catch(SyntaxError e) {				
 			IFile resource = resourceMap.get(e.filename());			

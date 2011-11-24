@@ -1,18 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Wyclipse
-Bundle-SymbolicName: wyclipse
-Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: wyclipse; singleton:=true
+Bundle-Version: 0.0.9
 Bundle-ClassPath: lib/wyjc.jar,
  .
 Bundle-Activator: wyclipse.Activator
-Export-Package: wyclipse,
- wyclipse.actions,
- wyclipse.builder,
- wyclipse.editor,
- wyclipse.launchers,
- wyclipse.natures,
- wyclipse.wizards
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jface.text,
