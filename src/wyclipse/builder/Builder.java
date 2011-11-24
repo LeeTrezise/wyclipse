@@ -121,8 +121,10 @@ public class Builder extends IncrementalProjectBuilder {
 		HashMap<String,IFile> resourceMap = new HashMap<String,IFile>();
 		try {
 			ArrayList<File> files = new ArrayList<File>();
-			for(IFile resource : compileableResources) {
-				File file = resource.getRawLocation().toFile();
+			for(IFile resource : compileableResources) {					
+				System.out.println("RESOURCE: " + resource);
+				System.out.println("Project Relative Path" + resource.getProjectRelativePath());
+				File file = resource.getLocation().toFile();
 				files.add(file);
 				System.out.println("COMPILING: " + file);
 				resourceMap.put(file.getAbsolutePath(), resource);
