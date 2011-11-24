@@ -31,8 +31,10 @@ public class Perspective implements IPerspectiveFactory {
 
 	private void defineActions(IPageLayout arg) {
 		
-		arg.addNewWizardShortcut("wyclipse.wizards.NewModuleWizard");
-		arg.addNewWizardShortcut("wyclipse.wizards.ProjectWizard");
+		arg.addNewWizardShortcut("wyclipse.newProjectWizard");
+		arg.addNewWizardShortcut("wyclipse.newModuleWizard");
+		
+		
 		System.out.println("Added New Wizards");
 	}
 

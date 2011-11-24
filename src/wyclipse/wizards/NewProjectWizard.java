@@ -13,6 +13,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageTwo;
+import org.eclipse.ui.IPerspectiveRegistry;
+import org.eclipse.ui.activities.WorkbenchActivityHelper;
+import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 import wyclipse.Activator;
 
@@ -27,7 +30,8 @@ import wyclipse.Activator;
  */
 public class NewProjectWizard extends NewElementWizard implements IExecutableExtension {
 	private NewJavaProjectWizardPageOne page1;
-	private NewJavaProjectWizardPageTwo page2;	
+	private NewJavaProjectWizardPageTwo page2;
+	private IConfigurationElement configElement;	
 	
 	/**
 	 * Constructor for WhileyModuleNewWizard.
@@ -61,7 +65,7 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 	
 	public void setInitializationData(IConfigurationElement config,
 			String property, Object data) {
-		// do nout for now
+		configElement = config;
 	}
 	
 	/**
@@ -96,10 +100,13 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 				
 				// done
 				project.setDescription(desc,null);
+				BasicNewProjectResourceWizard.updatePerspective(configElement);
+				
 			} catch(CoreException e) {
 				return false; // I guess??
 			}
 		}
+		
 		return result;
 	}
 	
@@ -112,4 +119,6 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
         page2.performCancel();
         return super.performCancel();
     }
+
+	
 }
