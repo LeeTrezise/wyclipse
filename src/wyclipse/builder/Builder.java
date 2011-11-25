@@ -223,17 +223,53 @@ public class Builder extends IncrementalProjectBuilder {
 	 * @return
 	 */
 	protected ArrayList<IFile> identifyCompileableResources(
-			List<IResource> resources) {
+			List<IResource> resources) throws CoreException {
+		
+		// First, identify source folders		
+		
+		IProject project = (IProject) getProject();
+		IJavaProject javaProject = (IJavaProject) project
+				.getNature(JavaCore.NATURE_ID);		
+		IWorkspace workspace = project.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
+		
+		ArrayList<IPath> sourceFolders = new ArrayList<IPath>(); 
+				
+		if (javaProject != null) {			
+			for (IClasspathEntry e : javaProject.getRawClasspath()) {
+				switch (e.getEntryKind()) {
+					case IClasspathEntry.CPE_SOURCE :			
+						IFolder folder = workspaceRoot.getFolder(e.getPath());						
+						sourceFolders.add(folder.getLocation());
+						break;					
+				}
+			}
+		}
+		
 		ArrayList<IFile> files = new ArrayList<IFile>();
 		for (IResource resource : resources) {
 			if (resource.getType() == IResource.FILE
-					&& resource.getFileExtension().equals("whiley")) {
+					&& resource.getFileExtension().equals("whiley")
+					&& containedInFolders(resource.getLocation(),
+							sourceFolders)) {
+				System.out.println("MATCHED");
 				files.add((IFile) resource);
 			}
 		}
 		return files;
 	}
 
+	protected boolean containedInFolders(IPath path,
+			ArrayList<IPath> folders) {
+		for(IPath folder : folders) {
+			System.out.println("LOOKING FOR: " + path + " in " + folder);
+			if(folder.isPrefixOf(path)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	protected void highlightSyntaxError(IResource resource, SyntaxError err)
 			throws CoreException {
 		// IMarker m = resource.createMarker(IMarker.PROBLEM);

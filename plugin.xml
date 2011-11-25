@@ -230,7 +230,7 @@
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
       <image
-            icon="icons/whiley_prj.gif"
+            icon="icons/whiley_perspective.gif"
             id="wyclipse.natureimage"
             natureId="wyclipse.whileynature">
       </image>
