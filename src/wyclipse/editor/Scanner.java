@@ -1,10 +1,16 @@
 package wyclipse.editor;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.ITokenScanner;
+import org.eclipse.jface.text.rules.Token;
+
 import wyc.stages.WhileyLexer;
-import org.eclipse.jface.text.rules.*;
-import org.eclipse.jface.text.*;
 
 public class Scanner implements ITokenScanner {
 	private ColorManager manager;
