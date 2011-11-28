@@ -10,6 +10,7 @@
 			icon="icons/whiley_perspective.gif">
 		</perspective>
 	</extension>
+	
   <extension
          point="org.eclipse.ui.editors">
       <editor
@@ -129,16 +130,13 @@
         modes="run, debug">
 			<perspective id ="org.eclipse.jdt.ui.JavaPerspective"/>
 			<perspective id="org.eclipse.ui.articles.perspective.Whiley"/>
-		
 		<contextualLaunch>
 			<enablement>
 			 	<with variable="selection">
 			 	<count value="1"/>
-			 	
 			 	<iterate>
 			 		<or>
-			 		
-                   	<test property="org.eclipse.debug.ui.matchesPattern" value="*.whiley"/>
+			 		<test property="org.eclipse.debug.ui.matchesPattern" value="*.whiley"/>
                     </or>
                 </iterate>
                	</with>

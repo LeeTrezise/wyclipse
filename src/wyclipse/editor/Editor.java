@@ -4,7 +4,7 @@ import org.eclipse.ui.editors.text.TextEditor;
 
 public class Editor extends TextEditor {
 	public Editor() {
-		super();		
+		super();
 		setSourceViewerConfiguration(new Configuration());		
 	}
 	public void dispose() {

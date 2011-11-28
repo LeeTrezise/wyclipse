@@ -1,67 +1,68 @@
 package wyclipse.editor;
 
-import java.io.IOException;
-import java.io.StringReader;
+
 import java.util.List;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextAttribute;
-import org.eclipse.jface.text.rules.IToken;
-import org.eclipse.jface.text.rules.ITokenScanner;
+import org.eclipse.jface.text.rules.EndOfLineRule;
+import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.IWhitespaceDetector;
+import org.eclipse.jface.text.rules.IWordDetector;
+import org.eclipse.jface.text.rules.MultiLineRule;
+import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.text.rules.SingleLineRule;
 import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.text.rules.WhitespaceRule;
+import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 
 import wyc.stages.WhileyLexer;
 
-public class Scanner implements ITokenScanner {
+//public class Scanner implements ITokenScanner {
+public class Scanner extends RuleBasedScanner {
 	private ColorManager manager;
 	private List<WhileyLexer.Token> tokens;
-	private int pos;
-	
-	public Scanner(ColorManager manager) {
-		this.manager = manager;						
-	}
-	
-	public int getTokenLength() {
-		WhileyLexer.Token token = tokens.get(pos-1);
-		return token.text.length();
-	}
-	
-	public int getTokenOffset() {
-		WhileyLexer.Token token = tokens.get(pos-1);
-		return token.start;
-	}
-	
-	public IToken nextToken() {
-		if(pos == tokens.size()) {
-			return Token.EOF;
-		} else {
-			WhileyLexer.Token token = tokens.get(pos++);
-			if (token instanceof WhileyLexer.Keyword) {
-				return new Token(new TextAttribute(
-						manager.getColor(ColorManager.KEYWORD_COLOR)));
-			} else if(token instanceof WhileyLexer.LineComment || token instanceof WhileyLexer.BlockComment) {
-				return new Token(new TextAttribute(
-						manager.getColor(ColorManager.COMMENT_COLOR)));
-			} else if(token instanceof WhileyLexer.Strung) {
-				return new Token(new TextAttribute(
-						manager.getColor(ColorManager.STRING_COLOR)));
-			} else {
-				return new Token(new TextAttribute(
-						manager.getColor(ColorManager.DEFAULT_COLOR)));
+	public Scanner() {
+		WordRule rule = new WordRule(new IWordDetector() {
+			
+			@Override
+			public boolean isWordStart(char c) {
+				return Character.isJavaIdentifierStart(c);
 			}
+			
+			@Override
+			public boolean isWordPart(char c) {
+				return Character.isJavaIdentifierPart(c);
+			}
+		});
+		
+		Token keyword = new Token(new TextAttribute(new Color(null, 127, 0, 85), null, SWT.BOLD));
+		Token comment = new Token(new TextAttribute(new Color(null, 63,127,95)));
+		Token string = new Token(new TextAttribute(new Color(null, 42, 0, 255)));
+		//for(WhileyLexer.Token tok: tokens) {
+		//	rule.addWord(tok.text, keyword);
+		//}
+		for(String s: WhileyLexer.keywords) {
+			rule.addWord(s, keyword);
 		}
+		setRules(new IRule[] {
+				rule,
+				new EndOfLineRule("//", comment),
+				new MultiLineRule("/*", "*/", comment, (char) 0, true),
+				new SingleLineRule("\"", "\"", string, '\\'),
+				new SingleLineRule("'", "'", string, '\\'),
+				new WhitespaceRule(new IWhitespaceDetector() {
+					
+					@Override
+					public boolean isWhitespace(char c) {
+						return Character.isWhitespace(c);
+					}
+				})		
+				
+		});
+		
+		
 	}
-	
-	public void setRange(IDocument document, int offset, int length) {
-		// At this point, we could be a little smarter and actually update the
-		// token list incrementally.
-		try {
-			String text = document.get();			
-			WhileyLexer lexer = new WhileyLexer(new StringReader(text));
-			tokens = lexer.scan();
-			pos = 0;
-		} catch(IOException e) {
-			// this is probably dead-code
-		}
-	}	
-}
+
+	}

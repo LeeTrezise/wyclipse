@@ -2,14 +2,21 @@ package wyclipse.launchers;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 
-import org.eclipse.core.runtime.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
-import org.eclipse.ui.internal.Workbench;
 import org.osgi.framework.Bundle;
 
 import wyclipse.Activator;
@@ -48,7 +55,14 @@ public class WhileyLauncher extends JavaLaunchDelegate {
 		System.out.println("Class Path Return");
 		return newClasspath;
 	}
-	
+	@Override
+	public void launch(ILaunchConfiguration configuration, String mode,
+			ILaunch launch, IProgressMonitor monitor) throws CoreException {
+		// TODO Auto-generated method stub
+		ILaunchConfigurationWorkingCopy work =  configuration.getWorkingCopy();
+		
+		super.launch(configuration, mode, launch, monitor);
+	}
 	
 }
 	   
