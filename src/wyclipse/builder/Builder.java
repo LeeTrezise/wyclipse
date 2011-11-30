@@ -52,7 +52,7 @@ public class Builder extends IncrementalProjectBuilder {
 			fullBuild(monitor);
 		} else if (kind == IncrementalProjectBuilder.INCREMENTAL_BUILD
 				|| kind == IncrementalProjectBuilder.AUTO_BUILD) {
-			IResourceDelta delta = getDelta(getProject());
+			IResourceDelta delta = getDelta(getProject());			
 			if (delta == null) {
 				fullBuild(monitor);
 			} else {
@@ -63,13 +63,39 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 
 	protected void fullBuild(IProgressMonitor monitor) throws CoreException {
-		IProject project = getProject();
-		for (IResource r : project.members()) {
-
-		}
-		// compile(identifyCompileableResources(resources));
+		// Force a complete reinitialisation of the compiler. This is necessary
+		// in case things changed, such as the CLASSPATH, etc.		
+		initialiseCompiler();
+					
+		ArrayList<IFile> sourceFiles = identifyAllCompileableResources(); 
+		clearSourceFileMarkers(sourceFiles);
+				
+		compile(sourceFiles);
 	}
 
+	protected void incrementalBuild(IResourceDelta delta,
+			IProgressMonitor monitor) throws CoreException {
+		ArrayList<IResource> resources = identifyChangedResources(delta);
+		
+		// First, check whether any important resources have changed (e.g.
+		// classpath). If so, then we need to reinitialise the compiler
+		// accordingly.
+		for(IResource resource : resources) {
+			if(isClassPath(resource)) {				
+				fullBuild(monitor);
+				return;
+			}
+		}
+		
+		ArrayList<IFile> sourceFiles = identifyCompileableResources(resources); 
+		clearSourceFileMarkers(sourceFiles);
+		
+		compile(sourceFiles);
+	}
+	
+	/**
+	 * Clean all derived files from this project.
+	 */
 	protected void clean(IProgressMonitor monitor) throws CoreException {
 		IProject project = getProject();
 		IWorkspace workspace = project.getWorkspace();
@@ -80,13 +106,16 @@ public class Builder extends IncrementalProjectBuilder {
 		// =====================================================
 		// first, delete everything in the default output folder
 		// =====================================================
+		
 		IPath defaultOutputLocation = javaProject.getOutputLocation();
 		IFolder defaultOutputContainer = workspaceRoot
 				.getFolder(defaultOutputLocation);
 
 		if (defaultOutputContainer != null) {
-			for (IResource r : defaultOutputContainer.members()) {
-				r.delete(true, monitor);
+			ArrayList<IFile> files = new ArrayList<IFile>();
+			addMatchingFiles(defaultOutputContainer, "class", files);
+			for (IFile file : files) {
+				file.delete(true, monitor);
 			}
 		}
 
@@ -96,13 +125,6 @@ public class Builder extends IncrementalProjectBuilder {
 
 		// TODO
 
-	}
-
-	protected void incrementalBuild(IResourceDelta delta,
-			IProgressMonitor monitor) throws CoreException {
-		ArrayList<IResource> resources = identifyChangedResources(delta);
-		clearMarkers(resources);
-		compile(identifyCompileableResources(resources));
 	}
 
 	protected void initialisePaths(ArrayList<Path.Root> whileypath,
@@ -140,15 +162,14 @@ public class Builder extends IncrementalProjectBuilder {
 					break;
 				}
 				case IClasspathEntry.CPE_CONTAINER:
-					System.out.println("ADDING CONTAINER?: " + e.toString());
+					System.out.println("ADDING CONTAINER?: " + e.getPath());
 					break;
 				}
 			}
 		}
 	}
 
-	protected void initialiseCompiler() throws CoreException {
-		
+	protected void initialiseCompiler() throws CoreException {		
 		IProject project = (IProject) getProject();
 		IJavaProject javaProject = (IJavaProject) project
 				.getNature(JavaCore.NATURE_ID);
@@ -243,19 +264,6 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 
 	/**
-	 * Remove all markers on those resources to be compiled.
-	 * 
-	 * @param resources
-	 * @throws CoreException
-	 */
-	protected void clearMarkers(List<IResource> resources) throws CoreException {
-		for (IResource resource : resources) {
-			resource.deleteMarkers(IMarker.PROBLEM, true,
-					IResource.DEPTH_INFINITE);
-		}
-	}
-
-	/**
 	 * Identify those resources which have changed, and which are allowed to be
 	 * compiled. Resources which cannot be compiled include those which are not
 	 * source files, or are not located in a designated source folder.
@@ -273,6 +281,9 @@ public class Builder extends IncrementalProjectBuilder {
 				.getNature(JavaCore.NATURE_ID);		
 		IWorkspace workspace = project.getWorkspace();
 		IWorkspaceRoot workspaceRoot = workspace.getRoot();
+		
+		// FIXME: the following information about source folders could be
+		// extracted from the compiler?
 		
 		ArrayList<IPath> sourceFolders = new ArrayList<IPath>(); 
 				
@@ -298,6 +309,46 @@ public class Builder extends IncrementalProjectBuilder {
 		return files;
 	}
 
+	/**
+	 * Identify those resources which have changed, and which are allowed to be
+	 * compiled. Resources which cannot be compiled include those which are not
+	 * source files, or are not located in a designated source folder.
+	 * 
+	 * @param resources
+	 * @return
+	 */
+	protected ArrayList<IFile> identifyAllCompileableResources()
+			throws CoreException {
+		
+		// First, identify source folders		
+		
+		IProject project = (IProject) getProject();
+		IJavaProject javaProject = (IJavaProject) project
+				.getNature(JavaCore.NATURE_ID);		
+		IWorkspace workspace = project.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
+		
+		ArrayList<IContainer> sourceFolders = new ArrayList<IContainer>(); 
+				
+		if (javaProject != null) {			
+			for (IClasspathEntry e : javaProject.getRawClasspath()) {
+				switch (e.getEntryKind()) {
+					case IClasspathEntry.CPE_SOURCE :			
+						IFolder folder = workspaceRoot.getFolder(e.getPath());						
+						sourceFolders.add(folder);
+						break;					
+				}
+			}
+		}
+		
+		ArrayList<IFile> files = new ArrayList<IFile>();
+		for(IContainer root : sourceFolders) {		
+			addMatchingFiles(root,"whiley",files);							
+		}
+		
+		return files;
+	}
+	
 	protected boolean containedInFolders(IPath path,
 			ArrayList<IPath> folders) {
 		for(IPath folder : folders) {			
@@ -307,6 +358,20 @@ public class Builder extends IncrementalProjectBuilder {
 		}
 		return false;
 	}
+
+	/**
+	 * Remove all markers on those resources to be compiled. It is assumed that
+	 * those resources supplied are only whiley source files.
+	 * 
+	 * @param resources
+	 * @throws CoreException
+	 */
+	protected void clearSourceFileMarkers(List<IFile> resources) throws CoreException {
+		for (IResource resource : resources) {			
+			resource.deleteMarkers(IMarker.PROBLEM, true,
+					IResource.DEPTH_INFINITE);			
+		}
+	}	
 	
 	protected void highlightSyntaxError(IResource resource, SyntaxError err)
 			throws CoreException {
@@ -317,7 +382,22 @@ public class Builder extends IncrementalProjectBuilder {
 		m.setAttribute(IMarker.MESSAGE, err.msg());
 		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
 		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
-		System.out.println(err.msg());
-
+	}
+	
+	private static boolean isClassPath(IResource resource) {
+		return resource instanceof IFile && resource.getName().equals(".classpath");
+	}
+	
+	private static void addMatchingFiles(IContainer resource,
+			final String extension, final ArrayList<IFile> files) {
+		IResourceVisitor visitor = new IResourceVisitor() {
+			public boolean visit(IResource resource) {
+				if (resource.getType() == IResource.FILE
+						&& resource.getFileExtension().equals(extension)) {
+					files.add((IFile) resource);
+				}
+				return true; // visit children as well.
+			}
+		};
 	}
 }
