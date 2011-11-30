@@ -112,8 +112,10 @@ public class Builder extends IncrementalProjectBuilder {
 				.getFolder(defaultOutputLocation);
 
 		if (defaultOutputContainer != null) {
-			for (IResource r : defaultOutputContainer.members()) {
-				r.delete(true, monitor);
+			ArrayList<IFile> files = new ArrayList<IFile>();
+			addMatchingFiles(defaultOutputContainer, "class", files);
+			for (IFile file : files) {
+				file.delete(true, monitor);
 			}
 		}
 
@@ -339,23 +341,9 @@ public class Builder extends IncrementalProjectBuilder {
 			}
 		}
 		
-		final ArrayList<IFile> files = new ArrayList<IFile>();
-		IResourceVisitor visitor = new IResourceVisitor() {
-			public boolean visit(IResource resource) {				
-				if (resource.getType() == IResource.FILE
-						&& resource.getFileExtension().equals("whiley")) {
-					files.add((IFile)resource);
-				}
-				return true; // visit children as well.
-			}
-		};
-		
-		for(IContainer root : sourceFolders) {
-			try {
-				root.accept(visitor);
-			} catch (CoreException e) {
-				e.printStackTrace();
-			}
+		ArrayList<IFile> files = new ArrayList<IFile>();
+		for(IContainer root : sourceFolders) {		
+			addMatchingFiles(root,"whiley",files);							
 		}
 		
 		return files;
@@ -398,5 +386,18 @@ public class Builder extends IncrementalProjectBuilder {
 	
 	private static boolean isClassPath(IResource resource) {
 		return resource instanceof IFile && resource.getName().equals(".classpath");
+	}
+	
+	private static void addMatchingFiles(IContainer resource,
+			final String extension, final ArrayList<IFile> files) {
+		IResourceVisitor visitor = new IResourceVisitor() {
+			public boolean visit(IResource resource) {
+				if (resource.getType() == IResource.FILE
+						&& resource.getFileExtension().equals(extension)) {
+					files.add((IFile) resource);
+				}
+				return true; // visit children as well.
+			}
+		};
 	}
 }
