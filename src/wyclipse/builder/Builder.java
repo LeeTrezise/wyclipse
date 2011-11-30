@@ -279,6 +279,7 @@ public class Builder extends IncrementalProjectBuilder {
 		m.setAttribute(IMarker.MESSAGE, err.msg());
 		m.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
 		m.setAttribute(IMarker.SEVERITY, IMarker.SEVERITY_ERROR);
+		System.out.println(err.msg());
 
 	}
 }

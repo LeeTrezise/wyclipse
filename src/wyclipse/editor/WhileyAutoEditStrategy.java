@@ -8,6 +8,8 @@ import org.eclipse.jface.text.TextUtilities;
 
 public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 
+	
+	
 	@Override
 	public void customizeDocumentCommand(IDocument document,
 			DocumentCommand command) {
@@ -28,7 +30,7 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 		} else if(command.text.equals("*")) {
 			try {
 				if(document.get(command.offset-1, 1).trim().equals("/")) {
-				command.text = "**/";
+				command.text = "*\n*/";
 				configureCommand(command);
 				}
 			} catch (BadLocationException e) {
@@ -75,9 +77,10 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 		if(c.offset == -1 || d.getLength() == 0) {
 			System.out.println("Returning d=0 or offset -1");
 			return;
-		}
-		System.out.println("Made to Try");
+		}	
+		
 		try {
+			String s = d.getPartition(c.length).getType();
 			int p = (c.offset == d.getLength() ? c.offset-1 : c.offset);
 			int start = d.getLineInformationOfOffset(p).getOffset();
 			int end = findEndOfWhiteSpace(d, start, c.offset);
@@ -85,10 +88,14 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 			if(end > start) {
 				buf.append(d.get(start, end-start));
 			}
+			
 			if(lastWord(d, c.offset).trim().endsWith(":")) {
 				c.text = buf.toString() + "\t";
-			} else {
-			c.text =  buf.toString();}
+			} else if (s.equals(WhileyPartitioner.WHILEY_MULTI_LINE_COMMENT)) {
+			c.text =  buf.toString() + "*";}
+			else {
+				c.text = buf.toString();
+			}
 		}catch(BadLocationException e) {
 			System.out.println("Excepting");
 			e.printStackTrace();

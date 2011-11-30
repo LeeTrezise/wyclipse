@@ -10,32 +10,21 @@ public class Perspective implements IPerspectiveFactory {
 	public void createInitialLayout(IPageLayout arg) {
 		defineActions(arg);
 		defineLayout(arg);
-		
 	}
 
 	public void defineLayout(IPageLayout layout) {
-        // Editors are placed for free.
         String editorArea = layout.getEditorArea();
-
-        // Place navigator and outline to left of
-        // editor area.
-        IFolderLayout left =
-                layout.createFolder("left", IPageLayout.LEFT, (float) 0.26, editorArea);
+        IFolderLayout left =layout.createFolder("left", IPageLayout.LEFT, (float) 0.26, editorArea);
         IFolderLayout bottom = layout.createFolder("bottom", IPageLayout.BOTTOM, 0.8f, editorArea);
-       // bottom.addView(IPageLayout.ID_PROGRESS_VIEW);
-        //left.addView(IPageLayout.ID_RES_NAV);
         bottom.addView("org.eclipse.ui.console.ConsoleView");
+        bottom.addView(IPageLayout.ID_PROBLEM_VIEW);
         left.addView(IPageLayout.ID_PROJECT_EXPLORER);
-        //left.addView(IPageLayout.ID_OUTLINE);
+        
 }
 
 	private void defineActions(IPageLayout arg) {
-		
 		arg.addNewWizardShortcut("wyclipse.newProjectWizard");
 		arg.addNewWizardShortcut("wyclipse.newModuleWizard");
-		
-		
-		System.out.println("Added New Wizards");
 	}
 
 }
