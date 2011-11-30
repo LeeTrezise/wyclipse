@@ -111,9 +111,9 @@ public class Builder extends IncrementalProjectBuilder {
 		IProject project = (IProject) getProject();
 		IJavaProject javaProject = (IJavaProject) project
 				.getNature(JavaCore.NATURE_ID);
-		System.out.println("DEFAULT OUTPUT LOCATIOT: "
-				+ javaProject.getOutputLocation());
-
+		IWorkspace workspace = project.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
+				
 		if (javaProject != null) {
 			for (IClasspathEntry e : javaProject.getRawClasspath()) {
 				switch (e.getEntryKind()) {
@@ -190,16 +190,11 @@ public class Builder extends IncrementalProjectBuilder {
 		try {
 			ArrayList<File> files = new ArrayList<File>();
 			for (IFile resource : compileableResources) {
-				System.out.println("RESOURCE: " + resource);
-				System.out.println("Project Relative Path"
-						+ resource.getProjectRelativePath());
 				File file = resource.getLocation().toFile();
-				files.add(file);
-				System.out.println("COMPILING: " + file);
+				files.add(file);				
 				resourceMap.put(file.getAbsolutePath(), resource);
 			}
-			
-			
+						
 			compiler.compile(files);
 		} catch (SyntaxError e) {
 			IFile resource = resourceMap.get(e.filename());
@@ -294,8 +289,7 @@ public class Builder extends IncrementalProjectBuilder {
 
 	protected boolean containedInFolders(IPath path,
 			ArrayList<IPath> folders) {
-		for(IPath folder : folders) {
-			System.out.println("LOOKING FOR: " + path + " in " + folder);
+		for(IPath folder : folders) {			
 			if(folder.isPrefixOf(path)) {
 				return true;
 			}
