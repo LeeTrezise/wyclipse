@@ -145,6 +145,15 @@ public class Builder extends IncrementalProjectBuilder {
 		templates.add(new Pipeline.Template(ClassWriter.class,
 				Collections.EMPTY_MAP));
 		Pipeline pipeline = new Pipeline(templates, nameResolver);
+		
+		IProject project = (IProject) getProject();
+		IJavaProject javaProject = (IJavaProject) project
+				.getNature(JavaCore.NATURE_ID);
+		String outputDirectory = javaProject.getOutputLocation().toOSString();
+		pipeline.setOption(ClassWriter.class, "outputDirectory",
+				outputDirectory);
+		System.out.println("SETTING OUTPUT DIRECTORY: " + outputDirectory);
+
 		compilerStages = pipeline.instantiate();
 		
 		// =========================================================
