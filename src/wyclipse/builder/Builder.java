@@ -31,7 +31,7 @@ import wyil.util.SyntaxError;
 import wyjc.io.ClassFileLoader;
 
 public class Builder extends IncrementalProjectBuilder {
-	private static final boolean verbose = true;
+	private static final boolean verbose = false;
 
 	private NameResolver nameResolver;
 	private List<Transform> compilerStages;

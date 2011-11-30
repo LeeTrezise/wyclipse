@@ -21,15 +21,14 @@ public class WhileyLauncher extends JavaLaunchDelegate {
 	/**
 	 * The main objective here is to add the Whiley runtime onto the classpath.
 	 */
-	@Override
-	
+	@Override	
 	public String[] getClasspath(ILaunchConfiguration configuration)
 			throws CoreException {
 		String[] classpath = super.getClasspath(configuration);
 		String[] newClasspath = Arrays.copyOf(classpath, classpath.length + 1);
 		
-		Bundle groovyBundle = Platform.getBundle("wyclipse");
-		Enumeration<URL> enu = groovyBundle.findEntries("lib",
+		Bundle whileyBundle = Platform.getBundle("wyclipse");
+		Enumeration<URL> enu = whileyBundle.findEntries("lib",
 				WHILEY_RUNTIME_JAR, false);
 		if (enu != null && enu.hasMoreElements()) {
 			try {
@@ -44,11 +43,8 @@ public class WhileyLauncher extends JavaLaunchDelegate {
 			throw new CoreException(
 					new Status(Status.ERROR, Activator.WYCLIPSE_BUILDER_ID,
 							"Could not find $jarName on the class path.  Please add it manually"));
-		}				
-		System.out.println("Class Path Return");
+		}						
 		return newClasspath;
-	}
-	
-	
+	}	
 }
 	   

@@ -79,6 +79,12 @@ public class ClassWriter implements Transform {
 		out.flush();
 		byte[] contents = out.toByteArray();
 		ByteArrayInputStream input = new ByteArrayInputStream(contents);
-		file.create(input, IResource.FORCE | IResource.DERIVED, null);		
+		if(file.exists()) {
+			// I don't really understand why I need to do this. I would have
+			// expected the create method below to be sufficient.
+			file.setContents(input, IResource.FORCE | IResource.DERIVED, null);
+		} else {				
+			file.create(input, IResource.FORCE | IResource.DERIVED, null);
+		}
 	}
 }
