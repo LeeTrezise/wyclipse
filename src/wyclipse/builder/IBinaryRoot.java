@@ -62,7 +62,7 @@ public class IBinaryRoot implements Root {
 		}
 	}
 	
-	public Entry lookup(ModuleID mid) throws IOException {
+	public Entry lookup(ModuleID mid) {
 		Path path = new Path(mid.toString().replace('.', '/'));
 		IResource member = dir.findMember(path);
 

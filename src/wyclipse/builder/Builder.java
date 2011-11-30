@@ -107,13 +107,21 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 
 	protected void initialisePaths(ArrayList<Path.Root> whileypath,
-			ArrayList<Path.Root> sourcepath) throws CoreException {		
-		IProject project = (IProject) getProject();
+			ArrayList<Path.Root> sourcepath, IContainer outputDirectory)
+			throws CoreException {
+		IProject project = (IProject) getProject();	
 		IJavaProject javaProject = (IJavaProject) project
 				.getNature(JavaCore.NATURE_ID);
 		IWorkspace workspace = project.getWorkspace();
 		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-				
+		IBinaryRoot bindir;
+		
+		if(outputDirectory != null) {
+			bindir = new IBinaryRoot(outputDirectory);
+		} else {
+			bindir = null;
+		}
+		
 		if (javaProject != null) {
 			for (IClasspathEntry e : javaProject.getRawClasspath()) {
 				switch (e.getEntryKind()) {
@@ -121,12 +129,11 @@ public class Builder extends IncrementalProjectBuilder {
 						System.out.println("ADDING JAR FILE: " + e.toString());
 						break;
 					case IClasspathEntry.CPE_SOURCE :
-						System.out
-								.println("ADDING SOURCE DIR: " + e.toString());
-						System.out.println("OUTPUT LOCATION: "
-								+ e.getOutputLocation());
+						IPath location = e.getOutputLocation();
+						IFolder folder = workspaceRoot.getFolder(location);
+						sourcepath.add(new ISourceRoot(folder,bindir));
 						break;
-					case IClasspathEntry.CPE_CONTAINER :
+					case IClasspathEntry.CPE_CONTAINER :						
 						System.out
 								.println("ADDING CONTAINER?: " + e.toString());
 						break;
@@ -136,12 +143,21 @@ public class Builder extends IncrementalProjectBuilder {
 	}
 
 	protected void initialiseCompiler() throws CoreException {
+		
+		IProject project = (IProject) getProject();
+		IJavaProject javaProject = (IJavaProject) project
+				.getNature(JavaCore.NATURE_ID);
+
+		IWorkspace workspace = project.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();		
+
 		// =========================================================
 		// Initialise whiley and source paths
 		// =========================================================
+		IContainer outputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());		
 		ArrayList<Path.Root> whileypath = new ArrayList<Path.Root>();
 		ArrayList<Path.Root> sourcepath = new ArrayList<Path.Root>();
-		initialisePaths(whileypath,sourcepath);
+		initialisePaths(whileypath,sourcepath,outputDirectory);
 		
 		// =========================================================
 		// Construct name resolver
@@ -153,14 +169,7 @@ public class Builder extends IncrementalProjectBuilder {
 		// =========================================================
 		// Construct and configure pipeline
 		// =========================================================
-						
-		IProject project = (IProject) getProject();
-		IJavaProject javaProject = (IJavaProject) project
-				.getNature(JavaCore.NATURE_ID);
 		
-		IWorkspace workspace = project.getWorkspace();
-		IWorkspaceRoot workspaceRoot = workspace.getRoot();
-		IContainer outputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());
 		
 		compilerStages = new ArrayList<Transform>();
 		compilerStages.add(new TypePropagation(nameResolver));					
@@ -199,7 +208,7 @@ public class Builder extends IncrementalProjectBuilder {
 		} catch (SyntaxError e) {
 			IFile resource = resourceMap.get(e.filename());
 			highlightSyntaxError(resource, e);
-		} catch (IOException e) {
+		} catch (Exception e) {			
 			e.printStackTrace();
 		}
 	}
