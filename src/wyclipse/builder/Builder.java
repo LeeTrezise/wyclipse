@@ -12,14 +12,23 @@ import org.osgi.framework.Bundle;
 import wyc.Compiler;
 import wyc.NameResolver;
 import wyc.Pipeline;
+import wyc.Pipeline.Template;
+import wyc.stages.BackPropagation;
+import wyc.stages.TypePropagation;
 import wyclipse.Activator;
+import wyil.io.WyilFileWriter;
 import wyil.path.*;
 import wyil.path.Path;
 import wyil.ModuleLoader;
 import wyil.Transform;
+import wyil.transforms.CoercionCheck;
+import wyil.transforms.ConstraintInline;
+import wyil.transforms.DeadCodeElimination;
+import wyil.transforms.DefiniteAssignment;
+import wyil.transforms.LiveVariablesAnalysis;
+import wyil.transforms.ModuleCheck;
 import wyil.util.SyntaxError;
 import wyjc.io.ClassFileLoader;
-import wyjc.transforms.ClassWriter;
 
 public class Builder extends IncrementalProjectBuilder {
 	private static final boolean verbose = false;
@@ -29,12 +38,17 @@ public class Builder extends IncrementalProjectBuilder {
 	private List<Transform> compilerStages;
 	private Compiler compiler;
 
-	public Builder() throws CoreException {
-		initialiseCompiler();
+	public Builder() {
+		
 	}
 
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
+		
+		if(compiler == null) {
+			initialiseCompiler();
+		}
+		
 		if (kind == IncrementalProjectBuilder.FULL_BUILD) {
 			fullBuild(monitor);
 		} else if (kind == IncrementalProjectBuilder.INCREMENTAL_BUILD
@@ -139,22 +153,24 @@ public class Builder extends IncrementalProjectBuilder {
 		// =========================================================
 		// Construct and configure pipeline
 		// =========================================================
-				
-		ArrayList<Pipeline.Template> templates = new ArrayList(
-				Pipeline.defaultPipeline);
-		templates.add(new Pipeline.Template(ClassWriter.class,
-				Collections.EMPTY_MAP));
-		Pipeline pipeline = new Pipeline(templates, nameResolver);
-		
+						
 		IProject project = (IProject) getProject();
 		IJavaProject javaProject = (IJavaProject) project
 				.getNature(JavaCore.NATURE_ID);
-		String outputDirectory = javaProject.getOutputLocation().toOSString();
-		pipeline.setOption(ClassWriter.class, "outputDirectory",
-				outputDirectory);
-		System.out.println("SETTING OUTPUT DIRECTORY: " + outputDirectory);
-
-		compilerStages = pipeline.instantiate();
+		
+		IWorkspace workspace = project.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
+		IContainer outputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());
+		
+		compilerStages = new ArrayList<Transform>();
+		compilerStages.add(new TypePropagation(nameResolver));					
+		compilerStages.add(new DefiniteAssignment(nameResolver));
+		compilerStages.add(new ModuleCheck(nameResolver));							
+		compilerStages.add(new BackPropagation(nameResolver));		
+		compilerStages.add(new CoercionCheck(nameResolver));
+		compilerStages.add(new DeadCodeElimination(nameResolver));
+		compilerStages.add(new LiveVariablesAnalysis(nameResolver));
+		compilerStages.add(new ClassWriter(nameResolver, outputDirectory));
 		
 		// =========================================================
 		// Construct and configure the compiler
