@@ -34,12 +34,13 @@ public class IBinaryRoot implements Root {
 		this.dir = dir;
 	}
 	
-	public boolean exists(PkgID pkg) throws IOException {
-		String pkgname = pkg.toString().replace('.', '/');
+	public boolean exists(PkgID pkg) throws CoreException {				
+		String pkgname = pkg.toString().replace('.', '/') + "/";
 		return dir.exists(new Path(pkgname));
 	}
 	
 	public List<Entry> list(PkgID pkg) throws CoreException {
+		System.err.println("LISTING: " + pkg);
 		Path path = new Path(pkg.toString().replace('.','/'));
 		IResource member = dir.findMember(path);
 		
@@ -63,6 +64,7 @@ public class IBinaryRoot implements Root {
 	}
 	
 	public Entry lookup(ModuleID mid) {
+		System.err.println("LOOKING UP: " + mid);
 		Path path = new Path(mid.toString().replace('.', '/'));
 		IResource member = dir.findMember(path);
 

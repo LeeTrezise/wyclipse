@@ -124,22 +124,24 @@ public class Builder extends IncrementalProjectBuilder {
 		if (javaProject != null) {
 			for (IClasspathEntry e : javaProject.getRawClasspath()) {
 				switch (e.getEntryKind()) {
-					case IClasspathEntry.CPE_LIBRARY: {						
-						IPath location = e.getPath();						
-						IFolder folder = workspaceRoot.getFolder(location);
-						whileypath.add(new IBinaryRoot(folder));						
-						break;
+				case IClasspathEntry.CPE_LIBRARY: {
+					IPath location = e.getPath();
+					try {
+						whileypath.add(new JarFileRoot(location.toOSString()));
+					} catch (IOException ex) {
+						// ignore entries which don't exist
 					}
-					case IClasspathEntry.CPE_SOURCE: {
-						IPath location = e.getPath();						
-						IFolder folder = workspaceRoot.getFolder(location);
-						sourcepath.add(new ISourceRoot(folder,bindir));
-						break;
-					}
-					case IClasspathEntry.CPE_CONTAINER :						
-						System.out
-								.println("ADDING CONTAINER?: " + e.toString());
-						break;
+					break;
+				}
+				case IClasspathEntry.CPE_SOURCE: {
+					IPath location = e.getPath();
+					IFolder folder = workspaceRoot.getFolder(location);
+					sourcepath.add(new ISourceRoot(folder, bindir));
+					break;
+				}
+				case IClasspathEntry.CPE_CONTAINER:
+					System.out.println("ADDING CONTAINER?: " + e.toString());
+					break;
 				}
 			}
 		}
@@ -172,8 +174,7 @@ public class Builder extends IncrementalProjectBuilder {
 		// =========================================================
 		// Construct and configure pipeline
 		// =========================================================
-		
-		
+				
 		compilerStages = new ArrayList<Transform>();
 		compilerStages.add(new TypePropagation(nameResolver));					
 		compilerStages.add(new DefiniteAssignment(nameResolver));
@@ -207,7 +208,7 @@ public class Builder extends IncrementalProjectBuilder {
 				resourceMap.put(file.getAbsolutePath(), resource);
 			}
 						
-			compiler.compile(files);
+			compiler.compile(files);			
 		} catch (SyntaxError e) {
 			IFile resource = resourceMap.get(e.filename());
 			highlightSyntaxError(resource, e);
