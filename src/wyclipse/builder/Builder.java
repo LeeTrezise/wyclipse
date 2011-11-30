@@ -10,8 +10,11 @@ import org.eclipse.jdt.core.*;
 import org.osgi.framework.Bundle;
 
 import wyc.Compiler;
+import wyc.NameResolver;
 import wyc.Pipeline;
 import wyclipse.Activator;
+import wyil.path.*;
+import wyil.path.Path;
 import wyil.ModuleLoader;
 import wyil.Transform;
 import wyil.util.SyntaxError;
@@ -22,14 +25,11 @@ public class Builder extends IncrementalProjectBuilder {
 	private static final boolean verbose = false;
 	private static final String WYRT_PATH = "lib/wyrt.jar";
 
-	private ArrayList<String> WHILEYPATH;
-	private ClassFileLoader classFileLoader;
-	private ModuleLoader moduleLoader;
+	private NameResolver nameResolver;
 	private List<Transform> compilerStages;
 	private Compiler compiler;
 
-	public Builder() {
-		initialiseWhileyPath();
+	public Builder() throws CoreException {
 		initialiseCompiler();
 	}
 
@@ -92,43 +92,8 @@ public class Builder extends IncrementalProjectBuilder {
 		compile(identifyCompileableResources(resources));
 	}
 
-	protected void initialiseWhileyPath() {
-		this.WHILEYPATH = new ArrayList<String>();
-		// Determine the BOOTHPATH (the path to the Whiley Runtime Jar,
-		// wyrt.jar)
-		try {
-			Bundle bundle = Platform.getBundle("wyclipse");
-			URL fileURL = FileLocator.resolve(bundle.getEntry(WYRT_PATH));
-			String BOOTPATH = fileURL.getPath();
-			this.WHILEYPATH.add(BOOTPATH);
-		} catch (IOException e) {
-			// hmmm, what should I do here?
-		}
-
-	}
-
-	protected void initialiseCompiler() {
-		this.classFileLoader = new ClassFileLoader();
-		this.moduleLoader = new ModuleLoader(WHILEYPATH, classFileLoader);
-		ArrayList<Pipeline.Template> templates = new ArrayList(
-				Pipeline.defaultPipeline);
-		templates.add(new Pipeline.Template(ClassWriter.class,
-				Collections.EMPTY_MAP));
-		Pipeline pipeline = new Pipeline(templates, moduleLoader);
-		compilerStages = pipeline.instantiate();
-		compiler = new Compiler(moduleLoader, compilerStages);
-		if (verbose) {
-			compiler.setLogOut(System.err);
-		}
-		moduleLoader.setLogger(compiler);
-	}
-
-	protected void compile(List<IFile> compileableResources)
-			throws CoreException {
-
-		// Construct CLASSPATH and SOURCEPATHs
-		ArrayList<String> classpath = new ArrayList<String>();
-		ArrayList<String> sourcepath = new ArrayList<String>();
+	protected void initialisePaths(ArrayList<Path.Root> whileypath,
+			ArrayList<Path.Root> sourcepath) throws CoreException {		
 		IProject project = (IProject) getProject();
 		IJavaProject javaProject = (IJavaProject) project
 				.getNature(JavaCore.NATURE_ID);
@@ -154,6 +119,47 @@ public class Builder extends IncrementalProjectBuilder {
 				}
 			}
 		}
+	}
+
+	protected void initialiseCompiler() throws CoreException {
+		// =========================================================
+		// Initialise whiley and source paths
+		// =========================================================
+		ArrayList<Path.Root> whileypath = new ArrayList<Path.Root>();
+		ArrayList<Path.Root> sourcepath = new ArrayList<Path.Root>();
+		initialisePaths(whileypath,sourcepath);
+		
+		// =========================================================
+		// Construct name resolver
+		// =========================================================
+		
+		this.nameResolver = new NameResolver(sourcepath,whileypath);
+		this.nameResolver.setModuleReader("class",new ClassFileLoader());
+		
+		// =========================================================
+		// Construct and configure pipeline
+		// =========================================================
+				
+		ArrayList<Pipeline.Template> templates = new ArrayList(
+				Pipeline.defaultPipeline);
+		templates.add(new Pipeline.Template(ClassWriter.class,
+				Collections.EMPTY_MAP));
+		Pipeline pipeline = new Pipeline(templates, nameResolver);
+		compilerStages = pipeline.instantiate();
+		
+		// =========================================================
+		// Construct and configure the compiler
+		// =========================================================
+				
+		compiler = new Compiler(nameResolver, compilerStages);
+		if (verbose) {
+			compiler.setLogOut(System.err);
+		}
+		nameResolver.setLogger(compiler);
+	}
+
+	protected void compile(List<IFile> compileableResources)
+			throws CoreException {
 
 		HashMap<String, IFile> resourceMap = new HashMap<String, IFile>();
 		try {
@@ -167,6 +173,8 @@ public class Builder extends IncrementalProjectBuilder {
 				System.out.println("COMPILING: " + file);
 				resourceMap.put(file.getAbsolutePath(), resource);
 			}
+			
+			
 			compiler.compile(files);
 		} catch (SyntaxError e) {
 			IFile resource = resourceMap.get(e.filename());
