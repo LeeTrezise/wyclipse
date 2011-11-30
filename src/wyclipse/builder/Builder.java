@@ -10,31 +10,44 @@ import org.eclipse.jdt.core.*;
 import org.osgi.framework.Bundle;
 
 import wyc.Compiler;
+import wyc.NameResolver;
 import wyc.Pipeline;
+import wyc.Pipeline.Template;
+import wyc.stages.BackPropagation;
+import wyc.stages.TypePropagation;
 import wyclipse.Activator;
+import wyil.io.WyilFileWriter;
+import wyil.path.*;
+import wyil.path.Path;
 import wyil.ModuleLoader;
 import wyil.Transform;
+import wyil.transforms.CoercionCheck;
+import wyil.transforms.ConstraintInline;
+import wyil.transforms.DeadCodeElimination;
+import wyil.transforms.DefiniteAssignment;
+import wyil.transforms.LiveVariablesAnalysis;
+import wyil.transforms.ModuleCheck;
 import wyil.util.SyntaxError;
 import wyjc.io.ClassFileLoader;
-import wyjc.transforms.ClassWriter;
 
 public class Builder extends IncrementalProjectBuilder {
 	private static final boolean verbose = false;
-	private static final String WYRT_PATH = "lib/wyrt.jar";
 
-	private ArrayList<String> WHILEYPATH;
-	private ClassFileLoader classFileLoader;
-	private ModuleLoader moduleLoader;
+	private NameResolver nameResolver;
 	private List<Transform> compilerStages;
 	private Compiler compiler;
 
 	public Builder() {
-		initialiseWhileyPath();
-		initialiseCompiler();
+		
 	}
 
 	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
+		
+		if(compiler == null) {
+			initialiseCompiler();
+		}
+		
 		if (kind == IncrementalProjectBuilder.FULL_BUILD) {
 			fullBuild(monitor);
 		} else if (kind == IncrementalProjectBuilder.INCREMENTAL_BUILD
@@ -92,86 +105,114 @@ public class Builder extends IncrementalProjectBuilder {
 		compile(identifyCompileableResources(resources));
 	}
 
-	protected void initialiseWhileyPath() {
-		this.WHILEYPATH = new ArrayList<String>();
-		// Determine the BOOTHPATH (the path to the Whiley Runtime Jar,
-		// wyrt.jar)
-		try {
-			Bundle bundle = Platform.getBundle("wyclipse");
-			URL fileURL = FileLocator.resolve(bundle.getEntry(WYRT_PATH));
-			String BOOTPATH = fileURL.getPath();
-			this.WHILEYPATH.add(BOOTPATH);
-		} catch (IOException e) {
-			// hmmm, what should I do here?
+	protected void initialisePaths(ArrayList<Path.Root> whileypath,
+			ArrayList<Path.Root> sourcepath, IContainer outputDirectory)
+			throws CoreException {
+		IProject project = (IProject) getProject();	
+		IJavaProject javaProject = (IJavaProject) project
+				.getNature(JavaCore.NATURE_ID);
+		IWorkspace workspace = project.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();
+		IBinaryRoot bindir;
+		
+		if(outputDirectory != null) {
+			bindir = new IBinaryRoot(outputDirectory);
+		} else {
+			bindir = null;
 		}
-
+		
+		if (javaProject != null) {
+			for (IClasspathEntry e : javaProject.getRawClasspath()) {
+				switch (e.getEntryKind()) {
+				case IClasspathEntry.CPE_LIBRARY: {
+					IPath location = e.getPath();
+					try {
+						whileypath.add(new JarFileRoot(location.toOSString()));
+					} catch (IOException ex) {
+						// ignore entries which don't exist
+					}
+					break;
+				}
+				case IClasspathEntry.CPE_SOURCE: {
+					IPath location = e.getPath();
+					IFolder folder = workspaceRoot.getFolder(location);
+					sourcepath.add(new ISourceRoot(folder, bindir));
+					break;
+				}
+				case IClasspathEntry.CPE_CONTAINER:
+					System.out.println("ADDING CONTAINER?: " + e.toString());
+					break;
+				}
+			}
+		}
 	}
 
-	protected void initialiseCompiler() {
-		this.classFileLoader = new ClassFileLoader();
-		this.moduleLoader = new ModuleLoader(WHILEYPATH, classFileLoader);
-		ArrayList<Pipeline.Template> templates = new ArrayList(
-				Pipeline.defaultPipeline);
-		templates.add(new Pipeline.Template(ClassWriter.class,
-				Collections.EMPTY_MAP));
-		Pipeline pipeline = new Pipeline(templates, moduleLoader);
-		compilerStages = pipeline.instantiate();
-		compiler = new Compiler(moduleLoader, compilerStages);
+	protected void initialiseCompiler() throws CoreException {
+		
+		IProject project = (IProject) getProject();
+		IJavaProject javaProject = (IJavaProject) project
+				.getNature(JavaCore.NATURE_ID);
+
+		IWorkspace workspace = project.getWorkspace();
+		IWorkspaceRoot workspaceRoot = workspace.getRoot();		
+
+		// =========================================================
+		// Initialise whiley and source paths
+		// =========================================================
+		IContainer outputDirectory = workspaceRoot.getFolder(javaProject.getOutputLocation());		
+		ArrayList<Path.Root> whileypath = new ArrayList<Path.Root>();
+		ArrayList<Path.Root> sourcepath = new ArrayList<Path.Root>();
+		initialisePaths(whileypath,sourcepath,outputDirectory);
+		
+		// =========================================================
+		// Construct name resolver
+		// =========================================================
+		
+		this.nameResolver = new NameResolver(sourcepath,whileypath);
+		this.nameResolver.setModuleReader("class",new ClassFileLoader());
+		
+		// =========================================================
+		// Construct and configure pipeline
+		// =========================================================
+				
+		compilerStages = new ArrayList<Transform>();
+		compilerStages.add(new TypePropagation(nameResolver));					
+		compilerStages.add(new DefiniteAssignment(nameResolver));
+		compilerStages.add(new ModuleCheck(nameResolver));							
+		compilerStages.add(new BackPropagation(nameResolver));		
+		compilerStages.add(new CoercionCheck(nameResolver));
+		compilerStages.add(new DeadCodeElimination(nameResolver));
+		compilerStages.add(new LiveVariablesAnalysis(nameResolver));
+		compilerStages.add(new ClassWriter(nameResolver, outputDirectory));
+		
+		// =========================================================
+		// Construct and configure the compiler
+		// =========================================================
+				
+		compiler = new Compiler(nameResolver, compilerStages);
 		if (verbose) {
 			compiler.setLogOut(System.err);
 		}
-		moduleLoader.setLogger(compiler);
+		nameResolver.setLogger(compiler);
 	}
 
 	protected void compile(List<IFile> compileableResources)
 			throws CoreException {
 
-		// Construct CLASSPATH and SOURCEPATHs
-		ArrayList<String> classpath = new ArrayList<String>();
-		ArrayList<String> sourcepath = new ArrayList<String>();
-		IProject project = (IProject) getProject();
-		IJavaProject javaProject = (IJavaProject) project
-				.getNature(JavaCore.NATURE_ID);
-		System.out.println("DEFAULT OUTPUT LOCATIOT: "
-				+ javaProject.getOutputLocation());
-
-		if (javaProject != null) {
-			for (IClasspathEntry e : javaProject.getRawClasspath()) {
-				switch (e.getEntryKind()) {
-					case IClasspathEntry.CPE_LIBRARY :
-						System.out.println("ADDING JAR FILE: " + e.toString());
-						break;
-					case IClasspathEntry.CPE_SOURCE :
-						System.out
-								.println("ADDING SOURCE DIR: " + e.toString());
-						System.out.println("OUTPUT LOCATION: "
-								+ e.getOutputLocation());
-						break;
-					case IClasspathEntry.CPE_CONTAINER :
-						System.out
-								.println("ADDING CONTAINER?: " + e.toString());
-						break;
-				}
-			}
-		}
-
 		HashMap<String, IFile> resourceMap = new HashMap<String, IFile>();
 		try {
 			ArrayList<File> files = new ArrayList<File>();
 			for (IFile resource : compileableResources) {
-				System.out.println("RESOURCE: " + resource);
-				System.out.println("Project Relative Path"
-						+ resource.getProjectRelativePath());
 				File file = resource.getLocation().toFile();
-				files.add(file);
-				System.out.println("COMPILING: " + file);
+				files.add(file);				
 				resourceMap.put(file.getAbsolutePath(), resource);
 			}
-			compiler.compile(files);
+						
+			compiler.compile(files);			
 		} catch (SyntaxError e) {
 			IFile resource = resourceMap.get(e.filename());
 			highlightSyntaxError(resource, e);
-		} catch (IOException e) {
+		} catch (Exception e) {			
 			e.printStackTrace();
 		}
 	}
@@ -250,9 +291,7 @@ public class Builder extends IncrementalProjectBuilder {
 		for (IResource resource : resources) {
 			if (resource.getType() == IResource.FILE
 					&& resource.getFileExtension().equals("whiley")
-					&& containedInFolders(resource.getLocation(),
-							sourceFolders)) {
-				System.out.println("MATCHED");
+					&& containedInFolders(resource.getLocation(), sourceFolders)) {
 				files.add((IFile) resource);
 			}
 		}
@@ -261,8 +300,7 @@ public class Builder extends IncrementalProjectBuilder {
 
 	protected boolean containedInFolders(IPath path,
 			ArrayList<IPath> folders) {
-		for(IPath folder : folders) {
-			System.out.println("LOOKING FOR: " + path + " in " + folder);
+		for(IPath folder : folders) {			
 			if(folder.isPrefixOf(path)) {
 				return true;
 			}
