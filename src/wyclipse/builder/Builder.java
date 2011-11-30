@@ -31,8 +31,7 @@ import wyil.util.SyntaxError;
 import wyjc.io.ClassFileLoader;
 
 public class Builder extends IncrementalProjectBuilder {
-	private static final boolean verbose = false;
-	private static final String WYRT_PATH = "lib/wyrt.jar";
+	private static final boolean verbose = true;
 
 	private NameResolver nameResolver;
 	private List<Transform> compilerStages;
@@ -125,14 +124,18 @@ public class Builder extends IncrementalProjectBuilder {
 		if (javaProject != null) {
 			for (IClasspathEntry e : javaProject.getRawClasspath()) {
 				switch (e.getEntryKind()) {
-					case IClasspathEntry.CPE_LIBRARY :
-						System.out.println("ADDING JAR FILE: " + e.toString());
+					case IClasspathEntry.CPE_LIBRARY: {						
+						IPath location = e.getPath();						
+						IFolder folder = workspaceRoot.getFolder(location);
+						whileypath.add(new IBinaryRoot(folder));						
 						break;
-					case IClasspathEntry.CPE_SOURCE :
-						IPath location = e.getOutputLocation();
+					}
+					case IClasspathEntry.CPE_SOURCE: {
+						IPath location = e.getPath();						
 						IFolder folder = workspaceRoot.getFolder(location);
 						sourcepath.add(new ISourceRoot(folder,bindir));
 						break;
+					}
 					case IClasspathEntry.CPE_CONTAINER :						
 						System.out
 								.println("ADDING CONTAINER?: " + e.toString());
@@ -287,9 +290,7 @@ public class Builder extends IncrementalProjectBuilder {
 		for (IResource resource : resources) {
 			if (resource.getType() == IResource.FILE
 					&& resource.getFileExtension().equals("whiley")
-					&& containedInFolders(resource.getLocation(),
-							sourceFolders)) {
-				System.out.println("MATCHED");
+					&& containedInFolders(resource.getLocation(), sourceFolders)) {
 				files.add((IFile) resource);
 			}
 		}
