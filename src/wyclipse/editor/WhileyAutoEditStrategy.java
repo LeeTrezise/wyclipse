@@ -8,6 +8,8 @@ import org.eclipse.jface.text.TextUtilities;
 
 public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 
+	private static final String[] unindentValues = new String[] {"return", "pass", "continue", "throws" };
+	
 	@Override
 	public void customizeDocumentCommand(IDocument document,
 			DocumentCommand command) {
@@ -25,6 +27,16 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 		} else if(command.text.equals("[")) {
 			command.text="[]";
 			configureCommand(command);
+		} else if(command.text.equals("*")) {
+			try {
+				if(document.get(command.offset-1, 1).trim().equals("/")) {
+				command.text = "*\n*/";
+				configureCommand(command);
+				}
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 	}
@@ -46,6 +58,7 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 		}
 		return end;
 	}
+
 	
 	public static String getLineIndent(IDocument doc, int line) throws BadLocationException {
 		if(line > -1) {
@@ -61,21 +74,79 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 	 * Used under the EPL v1.0 TODO PROPER CITATION
 	 */
 	private void autoIndentAfterLine(IDocument d, DocumentCommand c) {
+		System.out.println("Calling AUto Indent");
 		if(c.offset == -1 || d.getLength() == 0) {
+			System.out.println("Returning d=0 or offset -1");
 			return;
-		}
+		}	
+		
 		try {
+			String s = d.getPartition(c.length).getType();
 			int p = (c.offset == d.getLength() ? c.offset-1 : c.offset);
 			int start = d.getLineInformationOfOffset(p).getOffset();
 			int end = findEndOfWhiteSpace(d, start, c.offset);
+			if(matchesUnindent(getLine(d, c.offset))) {
+				end--;}
 			StringBuffer buf = new StringBuffer(c.text);
 			if(end > start) {
 				buf.append(d.get(start, end-start));
-			}
-			if(d.get(c.offset-1, 1).trim().equals(":")) {
+			}		
+			
+			if(lastWord(d, c.offset).trim().endsWith(":")) {
 				c.text = buf.toString() + "\t";
-			} else {
-			c.text =  buf.toString();}
-		}catch(BadLocationException e) {}
+			} else if (s.equals(WhileyPartitioner.WHILEY_MULTI_LINE_COMMENT)) {
+			c.text =  buf.toString() + "*";}
+			else {
+				c.text = buf.toString();
+			}
+		}catch(BadLocationException e) {
+			System.out.println("Excepting");
+			e.printStackTrace();
+		}
+	}
+	private boolean matchesUnindent(String line) {
+		String[] split = line.split(" ");
+		for(String s: unindentValues) {
+			if(s.equals(split[0]))
+				return true;
+		}
+		return false;
+	}
+
+	private String getLine(IDocument doc, int offset) throws BadLocationException {
+		try {
+			for(int n=offset-1;n>=0;n--) {
+				char c = doc.getChar(n);
+				if(c == '\t' || c =='\n' || c == '\0') {
+					//End of Line. Return.
+					return doc.get(n+1, offset-n-1);
+				}
+			}
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}
+		return "";
+	}
+	private String lastWord(IDocument doc, int offset) {
+		boolean start = true;
+		try {
+			for(int n = offset-1;n>=0;n--) {
+				char c = doc.getChar(n);
+				if(start) {
+					//Waiting for Actual Character
+					if(!Character.isWhitespace(c)) {
+						start = false;
+					}
+				}
+				else {
+				if(Character.isWhitespace(c)) {
+					return doc.get(n+1, offset-n-1);
+				}
+				}
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
 }

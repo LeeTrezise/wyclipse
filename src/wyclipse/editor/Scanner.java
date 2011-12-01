@@ -1,61 +1,58 @@
 package wyclipse.editor;
 
-import java.io.*;
-import java.util.*;
-import wyc.stages.WhileyLexer;
-import org.eclipse.jface.text.rules.*;
-import org.eclipse.jface.text.*;
 
-public class Scanner implements ITokenScanner {
-	private ColorManager manager;
-	private List<WhileyLexer.Token> tokens;
-	private int pos;
-	
-	public Scanner(ColorManager manager) {
-		this.manager = manager;						
-	}
-	
-	public int getTokenLength() {
-		WhileyLexer.Token token = tokens.get(pos-1);
-		return token.text.length();
-	}
-	
-	public int getTokenOffset() {
-		WhileyLexer.Token token = tokens.get(pos-1);
-		return token.start;
-	}
-	
-	public IToken nextToken() {
-		if(pos == tokens.size()) {
-			return Token.EOF;
-		} else {
-			WhileyLexer.Token token = tokens.get(pos++);
-			if (token instanceof WhileyLexer.Keyword) {
-				return new Token(new TextAttribute(
-						manager.getColor(ColorManager.KEYWORD_COLOR)));
-			} else if(token instanceof WhileyLexer.LineComment || token instanceof WhileyLexer.BlockComment) {
-				return new Token(new TextAttribute(
-						manager.getColor(ColorManager.COMMENT_COLOR)));
-			} else if(token instanceof WhileyLexer.Strung) {
-				return new Token(new TextAttribute(
-						manager.getColor(ColorManager.STRING_COLOR)));
-			} else {
-				return new Token(new TextAttribute(
-						manager.getColor(ColorManager.DEFAULT_COLOR)));
+import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.jface.text.rules.EndOfLineRule;
+import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.IWordDetector;
+import org.eclipse.jface.text.rules.MultiLineRule;
+import org.eclipse.jface.text.rules.RuleBasedScanner;
+import org.eclipse.jface.text.rules.SingleLineRule;
+import org.eclipse.jface.text.rules.Token;
+import org.eclipse.jface.text.rules.WhitespaceRule;
+import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+
+import wyc.stages.WhileyLexer;
+
+
+
+public class Scanner extends RuleBasedScanner {
+
+		public Scanner() {
+			IToken keyword = new Token(new TextAttribute(new Color(null, 127, 0, 85), null, SWT.BOLD));
+			IToken comment = new Token(new TextAttribute(new Color(null, 63,127,95)));
+			IToken string = new Token(new TextAttribute(new Color(null, 42, 0, 255)));
+			WordRule rule = new WordRule(new IWordDetector() {
+				@Override
+				public boolean isWordStart(char c) {
+					return Character.isJavaIdentifierStart(c);
+				}
+				@Override
+				public boolean isWordPart(char c) {
+					return Character.isJavaIdentifierPart(c);
+				}
+			});
+			for(String s: WhileyLexer.keywords) {
+				rule.addWord(s, keyword);
 			}
+				rule.addWord("from", keyword); // HACK. TODO FIX
+			IRule[] rules = new IRule[6];
+			rules[0] = new SingleLineRule("\"", "\"", string, '\\');
+			// Add a rule for single quotes
+			rules[1] = new SingleLineRule("'", "'", string, '\\');
+			// Add generic whitespace rule.
+			rules[2] = new WhitespaceRule(new WhitespaceDetector());
+			
+			rules[3] = rule;
+			rules[4] = new EndOfLineRule("//", comment);
+			rules[5] = new MultiLineRule("/*", "", comment, (char) 0, true);
+			setRules(rules);
 		}
+		
+		
+		
+		
 	}
-	
-	public void setRange(IDocument document, int offset, int length) {
-		// At this point, we could be a little smarter and actually update the
-		// token list incrementally.
-		try {
-			String text = document.get();			
-			WhileyLexer lexer = new WhileyLexer(new StringReader(text));
-			tokens = lexer.scan();
-			pos = 0;
-		} catch(IOException e) {
-			// this is probably dead-code
-		}
-	}	
-}
