@@ -27,7 +27,7 @@
    
    <extension
          id="whileybuilder"
-         name="Whiley Project Builder"
+         name="Whiley Builder"
          point="org.eclipse.core.resources.builders">
       <builder
             hasNature="true">
@@ -234,6 +234,12 @@
             id="wyclipse.natureimage"
             natureId="wyclipse.whileynature">
       </image>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+          id="wyclipse.WHILEY_CONTAINER"
+          class="wyclipse.builder.WhileyClasspathContainerInitialiser"/>
    </extension>
 
 	

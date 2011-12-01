@@ -21,6 +21,9 @@ public class Activator extends AbstractUIPlugin {
 	// marker ID
 	public static final String WYCLIPSE_MARKER_ID = "wyclipse.whileymarker";
 	
+	// classpath container ID
+	public static final String WYCLIPSE_CLASSPATHCONTAINER_PATH = "wyclipse.whileymarker";
+	
 	// The shared instance
 	private static Activator plugin;
 	

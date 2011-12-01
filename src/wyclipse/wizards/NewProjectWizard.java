@@ -9,6 +9,7 @@ import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 // Should not extend this, but seems that I can!
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.ui.wizards.NewJavaProjectWizardPageOne;
@@ -18,6 +19,7 @@ import org.eclipse.ui.activities.WorkbenchActivityHelper;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 
 import wyclipse.Activator;
+import wyclipse.WhileyCore;
 
 /**
  * This Wizard is responsible for constructing a new Whiley project. In fact, it
@@ -79,7 +81,8 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 			// nature to the new project, in order that we can build Whiley
 			// files!
 			try {
-				IProject project = page2.getJavaProject().getProject();
+				IJavaProject javaProject = page2.getJavaProject(); 
+				IProject project = javaProject.getProject();
 				IProjectDescription desc = project.getDescription();
 				
 				// First, append Whiley Nature onto list of natures
@@ -88,15 +91,20 @@ public class NewProjectWizard extends NewElementWizard implements IExecutableExt
 				newNatures[oldNatures.length] = Activator.WYCLIPSE_NATURE_ID;							
 				desc.setNatureIds(newNatures);
 
-				// Second, append Whiley Builder onto list of builders
-				ICommand[] oldBuilders = desc.getBuildSpec();
-				ICommand[] newBuilders = Arrays.copyOf(oldBuilders, oldBuilders.length+1);
-				ICommand buildCommand = desc.newCommand();
-				// TODO: is the ordering here important? We definitely want wyjc
-				// to run first.
+				// Second, prepend Whiley Builder onto list of builders
+				ICommand buildCommand = desc.newCommand();				
 				buildCommand.setBuilderName(Activator.WYCLIPSE_BUILDER_ID);
+				
+				ICommand[] oldBuilders = desc.getBuildSpec();
+//				ICommand[] newBuilders = new ICommand[oldBuilders.length+1];
+//				System.arraycopy(oldBuilders, 0, newBuilders, 1, oldBuilders.length);				
+//				newBuilders[0] = buildCommand;
+				ICommand[] newBuilders = Arrays.copyOf(oldBuilders, oldBuilders.length+1);
 				newBuilders[oldBuilders.length] = buildCommand;
 				desc.setBuildSpec(newBuilders);		
+				
+				// Third, add the Whiley class path container
+				WhileyCore.addWhileyClasspathContainer(javaProject);
 				
 				// done
 				project.setDescription(desc,null);

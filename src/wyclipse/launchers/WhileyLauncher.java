@@ -26,7 +26,7 @@ public class WhileyLauncher extends JavaLaunchDelegate {
 			throws CoreException {
 		String[] classpath = super.getClasspath(configuration);
 		String[] newClasspath = Arrays.copyOf(classpath, classpath.length + 1);
-		
+		// FIXME: do we really need this?
 		Bundle whileyBundle = Platform.getBundle("wyclipse");
 		Enumeration<URL> enu = whileyBundle.findEntries("lib",
 				WHILEY_RUNTIME_JAR, false);

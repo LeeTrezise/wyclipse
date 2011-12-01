@@ -229,7 +229,8 @@ public class Builder extends IncrementalProjectBuilder {
 				resourceMap.put(file.getAbsolutePath(), resource);
 			}
 						
-			compiler.compile(files);			
+			compiler.compile(files);
+						
 		} catch (SyntaxError e) {
 			IFile resource = resourceMap.get(e.filename());
 			highlightSyntaxError(resource, e);
