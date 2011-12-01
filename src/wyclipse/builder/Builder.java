@@ -144,31 +144,45 @@ public class Builder extends IncrementalProjectBuilder {
 		}
 		
 		if (javaProject != null) {
-			for (IClasspathEntry e : javaProject.getRawClasspath()) {
-				switch (e.getEntryKind()) {
-				case IClasspathEntry.CPE_LIBRARY: {
-					IPath location = e.getPath();
-					try {
-						whileypath.add(new JarFileRoot(location.toOSString()));
-					} catch (IOException ex) {
-						// ignore entries which don't exist
-					}
-					break;
-				}
-				case IClasspathEntry.CPE_SOURCE: {
-					IPath location = e.getPath();
-					IFolder folder = workspaceRoot.getFolder(location);
-					sourcepath.add(new ISourceRoot(folder, bindir));
-					break;
-				}
-				case IClasspathEntry.CPE_CONTAINER:
-					System.out.println("ADDING CONTAINER?: " + e.getPath());
-					break;
-				}
-			}
+			initialisePaths(javaProject.getRawClasspath(), whileypath,
+					sourcepath, workspaceRoot, javaProject, bindir);
 		}
 	}
 
+	protected void initialisePaths(IClasspathEntry[] entries,
+			ArrayList<Path.Root> whileypath, ArrayList<Path.Root> sourcepath,
+			IWorkspaceRoot workspaceRoot, IJavaProject javaProject,
+			IBinaryRoot bindir)
+			throws CoreException {
+	for (IClasspathEntry e : entries) {
+			switch (e.getEntryKind()) {
+			case IClasspathEntry.CPE_LIBRARY: {
+				IPath location = e.getPath();
+				try {
+					whileypath.add(new JarFileRoot(location.toOSString()));
+				} catch (IOException ex) {
+					// ignore entries which don't exist
+				}
+				break;
+			}
+			case IClasspathEntry.CPE_SOURCE: {
+				IPath location = e.getPath();
+				IFolder folder = workspaceRoot.getFolder(location);
+				sourcepath.add(new ISourceRoot(folder, bindir));
+				break;
+			}
+			case IClasspathEntry.CPE_CONTAINER:
+				IPath location = e.getPath();
+				IClasspathContainer container = JavaCore.getClasspathContainer(location, javaProject);
+				// can container be null here?
+				// Now, recursively add paths
+				initialisePaths(container.getClasspathEntries(), whileypath,
+						sourcepath, workspaceRoot, javaProject, bindir);
+				break;
+			}
+		}
+	}
+	
 	protected void initialiseCompiler() throws CoreException {		
 		IProject project = (IProject) getProject();
 		IJavaProject javaProject = (IJavaProject) project

@@ -38,7 +38,7 @@
    <extension
          point="org.eclipse.core.contenttype.contentTypes">
       <content-type
-            
+            base-type="org.eclipse.jdt.core.javaSource"
             file-extensions="whiley"
             id="whileySource"
             name="Whiley Source File"
