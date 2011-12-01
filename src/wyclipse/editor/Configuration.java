@@ -36,7 +36,7 @@ public class Configuration extends SourceViewerConfiguration {
 		        IAutoEditStrategy strategy= (IDocument.DEFAULT_CONTENT_TYPE.equals(contentType) ||
 		        		WhileyPartitioner.WHILEY_MULTI_LINE_COMMENT.equals(contentType)
 		        ? new WhileyAutoEditStrategy() : new DefaultIndentLineAutoEditStrategy());
-		        return new IAutoEditStrategy[] { strategy };
+		        return new IAutoEditStrategy[] { new WhileyAutoEditStrategy() };
 		    }
 	public IPresentationReconciler getPresentationReconciler(
 			ISourceViewer sourceViewer) {

@@ -5,11 +5,13 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Enumeration;
 
-import org.eclipse.core.runtime.*;
-import org.eclipse.debug.core.ILaunch;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.launching.JavaLaunchDelegate;
-import org.eclipse.ui.internal.Workbench;
 import org.osgi.framework.Bundle;
 
 import wyclipse.Activator;
@@ -17,11 +19,12 @@ import wyclipse.Activator;
 public class WhileyLauncher extends JavaLaunchDelegate {
 
 	private static final String WHILEY_RUNTIME_JAR = "wyrt.jar";
-	
+	public static ILaunchConfiguration conf;
 	/**
 	 * The main objective here is to add the Whiley runtime onto the classpath.
 	 */
 	@Override	
+	
 	public String[] getClasspath(ILaunchConfiguration configuration)
 			throws CoreException {
 		String[] classpath = super.getClasspath(configuration);
@@ -43,8 +46,12 @@ public class WhileyLauncher extends JavaLaunchDelegate {
 			throw new CoreException(
 					new Status(Status.ERROR, Activator.WYCLIPSE_BUILDER_ID,
 							"Could not find $jarName on the class path.  Please add it manually"));
-		}						
+		}
+		conf = configuration;
 		return newClasspath;
 	}	
+	public ILaunchManager getManager() {
+		return getLaunchManager();
+	}
 }
 	   
