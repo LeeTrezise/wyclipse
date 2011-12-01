@@ -52,6 +52,13 @@ public class WhileyCore {
         project.setRawClasspath(newEntries, null);
     }
 
+	/**
+	 * Find the location of the Whiley Runtime Jar (wyrt.jar). This is shipped
+	 * with wyclipse, so should be located in the lib/ folder of its bundle.
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
 	public static IPath getWhileyRuntimeJar() throws IOException {
     	Bundle whileyBundle = Platform.getBundle("wyclipse");
     	URL location = whileyBundle.getEntry("lib/" + WHILEY_RUNTIME_JAR);    	
