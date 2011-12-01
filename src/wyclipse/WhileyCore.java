@@ -32,24 +32,11 @@ public class WhileyCore {
 	 */
 	public static void addWhileyClasspathContainer(IJavaProject javaProject) throws CoreException {
 		IClasspathEntry containerEntry = JavaCore.newContainerEntry(
-				WhileyClasspathContainer.CONTAINER_PATH);
-		addClassPathEntry(javaProject, containerEntry);        
-    }
-
-    /**
-     * Adds a classpath entry to the end of a project's classpath
-     * 
-     * @param project
-     *            The project to add the entry to.
-     * @param entry
-     *            The classpath entry to add.
-     */
-    public static void addClassPathEntry(IJavaProject project,
-            IClasspathEntry entry) throws JavaModelException {
-    	IClasspathEntry[] oldEntries = project.getRawClasspath();
+				WhileyClasspathContainer.CONTAINER_PATH);		
+		IClasspathEntry[] oldEntries = javaProject.getRawClasspath();
         IClasspathEntry[] newEntries = Arrays.copyOf(oldEntries,oldEntries.length+1); 
-        newEntries[oldEntries.length] = entry;
-        project.setRawClasspath(newEntries, null);
+        newEntries[oldEntries.length] = containerEntry;
+        javaProject.setRawClasspath(newEntries, null);
     }
 
 	/**
