@@ -8,7 +8,7 @@ import org.eclipse.jface.text.TextUtilities;
 
 public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 
-	private static final String[] unindentValues = new String[] {"return", "pass", "continue", "throws" };
+	private static final String[] unindentValues = new String[] {"return", "pass", "continue", "throws", "skip" };
 	
 	@Override
 	public void customizeDocumentCommand(IDocument document,
@@ -34,7 +34,6 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 				configureCommand(command);
 				}
 			} catch (BadLocationException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -43,7 +42,6 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 	
 	private void configureCommand(DocumentCommand com) {
         com.caretOffset = com.offset+1;
-
         com.shiftsCaret = false;
 		
 	}
@@ -74,14 +72,13 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 	 * Used under the EPL v1.0 TODO PROPER CITATION
 	 */
 	private void autoIndentAfterLine(IDocument d, DocumentCommand c) {
-		System.out.println("Calling AUto Indent");
 		if(c.offset == -1 || d.getLength() == 0) {
 			System.out.println("Returning d=0 or offset -1");
 			return;
 		}	
 		
 		try {
-			String s = d.getPartition(c.length).getType();
+			//String s = d.getPartition(c.length).getType();
 			int p = (c.offset == d.getLength() ? c.offset-1 : c.offset);
 			int start = d.getLineInformationOfOffset(p).getOffset();
 			int end = findEndOfWhiteSpace(d, start, c.offset);
@@ -91,12 +88,9 @@ public class WhileyAutoEditStrategy implements IAutoEditStrategy {
 			if(end > start) {
 				buf.append(d.get(start, end-start));
 			}		
-			
 			if(lastWord(d, c.offset).trim().endsWith(":")) {
 				c.text = buf.toString() + "\t";
-			} else if (s.equals(WhileyPartitioner.WHILEY_MULTI_LINE_COMMENT)) {
-			c.text =  buf.toString() + "*";}
-			else {
+			} else {
 				c.text = buf.toString();
 			}
 		}catch(BadLocationException e) {

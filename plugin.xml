@@ -7,27 +7,25 @@
 			name ="Whiley"
 			class="wyclipse.perspective.Perspective"
 			id="org.eclipse.ui.articles.perspective.Whiley"
-			
 			icon="icons/whiley_perspective.gif">
 		</perspective>
 	</extension>
 	
-  <extension
-         point="org.eclipse.ui.editors">
-      <editor
-            class="wyclipse.editor.Editor"
+  	<extension
+    	point="org.eclipse.ui.editors">
+      	<editor
+       	 	class="wyclipse.editor.Editor"
             contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
             extensions="whiley"
             icon="icons/whiley_file.gif"
             id="whileyEditor"
-            
             name="Whiley Source File Editor">
-         <contentTypeBinding
-               contentTypeId="wyclipse.whileySource">
-               
-         </contentTypeBinding>
-      </editor>
-   </extension>
+        	<contentTypeBinding
+            	contentTypeId="wyclipse.whileySource">
+          	</contentTypeBinding>
+     	 </editor>
+  	 </extension>
+   
 	<extension
 		point="org.eclipse.core.filebuffers.documentSetup">
 		<participant
@@ -36,35 +34,34 @@
 		</participant>
 	</extension>
    <extension
-         point="org.eclipse.core.contenttype.contentTypes">
-      <content-type
-            
-            file-extensions="whiley"
+    	point="org.eclipse.core.contenttype.contentTypes">
+      	<content-type
+        	file-extensions="whiley"
             id="whileySource"
             name="Whiley Source File"
             priority="high">
-      </content-type>
-      <content-type
+      	</content-type>
+      	<content-type
             base-type="org.eclipse.core.runtime.text"
             file-extensions="whiley"
-            
             id="wyclipse.whileyText"
             name="Whiley Text File"
-             
-            priority="low">
+           priority="low">
       </content-type>
    </extension>
+   
    <extension
          id="whileybuilder"
          name="Whiley Project Builder"
          point="org.eclipse.core.resources.builders">
-      <builder
-      		
-            hasNature="true">
-         <run
-               class="wyclipse.builder.Builder">
-         </run></builder>
+      	<builder
+      		hasNature="true">
+         	<run
+            	class="wyclipse.builder.Builder">
+         	</run>
+       </builder>
    </extension>
+   
    <extension
          id="whileynature"
          name="Whiley Nature"
@@ -119,17 +116,15 @@
  </extension>
  
    <extension
-         id="whileymarker"
-         name="Whiley Syntax Marker"
-         
-         point="org.eclipse.core.resources.markers">
-      <super
-            type="org.eclipse.core.resources.textmarker">
-      </super>
-      <super
-            type="org.eclipse.core.resources.problemmarker">
-      </super>
+        id="wyclipse.whileymarker"
+       	name="Whiley Syntax Marker"
+        point="org.eclipse.core.resources.markers">
+      	<super type="org.eclipse.core.resources.textmarker"/>
+		<super type="org.eclipse.core.resources.problemmarker"/>
+		<persistent value="true"/>
+		
    </extension>
+   
    <extension point="org.eclipse.debug.core.launchConfigurationTypes">
       <launchConfigurationType
             delegate="wyclipse.launchers.WhileyLauncher"
