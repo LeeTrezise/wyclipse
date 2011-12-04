@@ -1,5 +1,7 @@
 package wyclipse.editor;
 
+import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
+import org.eclipse.jdt.internal.ui.text.java.hover.AnnotationHover;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.IAutoEditStrategy;
@@ -9,6 +11,8 @@ import org.eclipse.jface.text.TextAttribute;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
+import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.swt.graphics.RGB;
@@ -53,10 +57,6 @@ public class Configuration extends SourceViewerConfiguration {
 						manager.getColor(new RGB(63, 127, 95))));
 		pr.setRepairer(ndr, WhileyPartitioner.WHILEY_MULTI_LINE_COMMENT);
 		pr.setDamager(ndr, WhileyPartitioner.WHILEY_MULTI_LINE_COMMENT);
-		
-		
-
-		
 		return pr;		
 	}
 	
@@ -64,6 +64,11 @@ public class Configuration extends SourceViewerConfiguration {
 		return new DefaultTextHover(sv);		
 	}
 	
-
+	@Override
+	public IAnnotationHover getAnnotationHover(ISourceViewer sourceViewer) {
+		return new DefaultAnnotationHover();
+	}
+	
+	
 	
 }
