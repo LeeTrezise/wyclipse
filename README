@@ -6,3 +6,20 @@ Wyclipse is an Eclipse plugin for the Whiley Language.  Using this
 plugin, you can compile and run Whiley Programs.
 
 To find out more about the Whiley language, visit http://whiley.org
+
+======================================================================
+Installation
+======================================================================
+
+The latest version of Wyclipse can be installed from Eclipse using the 
+following update site:
+
+http://whiley.org/eclipse/  
+
+======================================================================
+Making a Contribution
+======================================================================
+
+When making a contribution to the Whiley project, you will need to
+first sign-off the developers certificate of origin.  Please see the
+CONTRIBUTORS file for more details.
