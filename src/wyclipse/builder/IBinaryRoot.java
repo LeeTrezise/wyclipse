@@ -34,7 +34,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
-import wyil.path.Path.*;
+import wyil.util.path.Path.*;
 import wyil.lang.Module;
 import wyil.lang.ModuleID;
 import wyil.lang.PkgID;

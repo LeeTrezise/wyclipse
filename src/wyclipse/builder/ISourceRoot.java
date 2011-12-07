@@ -40,7 +40,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import wyclipse.builder.IBinaryRoot.IEntry;
-import wyil.path.Path.*;
+import wyil.util.path.Path.*;
 import wyil.lang.ModuleID;
 import wyil.lang.PkgID;
 
