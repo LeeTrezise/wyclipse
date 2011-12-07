@@ -245,17 +245,6 @@
       </launchConfigurationTabGroup>
    </extension>
    <extension
-         point="org.eclipse.ui.ide.projectNatureImages">
-      <image
-      		icon="icons/whiley_perspective.gif"
-            id="wyclipse.natureimage"
-            natureId="org.eclipse.jdt.core.javanature">
-            
-      </image> 
-      
-      
-   </extension>
-   <extension
          point="org.eclipse.jdt.core.classpathContainerInitializer">
       <classpathContainerInitializer
           id="wyclipse.WHILEY_CONTAINER"
