@@ -25,6 +25,13 @@
 
 package wyclipse;
 
+import java.net.URL;
+
+import org.eclipse.core.filesystem.URIUtil;
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -45,14 +52,18 @@ public class Activator extends AbstractUIPlugin {
 	// marker ID
 	public static final String WYCLIPSE_MARKER_ID = "wyclipse.whileymarker";
 
+	// URL for Whiley Runtime Library
+	public static final String WHILEY_RUNTIME_JAR = "lib/wyrt.jar";
+	public static IPath WHILEY_RUNTIME_JAR_IPATH;
+	
 	// The shared instance
 	private static Activator plugin;
-
 
 	/**
 	 * The constructor
 	 */
 	public Activator() {
+		plugin = this;
 	}
 
 	/*
@@ -60,16 +71,23 @@ public class Activator extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
+		super.start(context);		
+		try {
+			URL url = FileLocator.resolve(context.getBundle().getEntry(
+					WHILEY_RUNTIME_JAR));
+			WHILEY_RUNTIME_JAR_IPATH = URIUtil.toPath(url.toURI());
+		} catch (Exception e) {
+			getLog().log(
+					new Status(IStatus.ERROR, PLUGIN_ID,
+							"Error starting wyclipse plugin", e));
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
+	public void stop(BundleContext context) throws Exception {		
 		super.stop(context);
 	}
 

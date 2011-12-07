@@ -54,13 +54,13 @@ public class WhileyClasspathContainer implements IClasspathContainer {
 	public IClasspathEntry[] getClasspathEntries() {
 		if (entries == null) {
 			try {
-				IPath wyrtPath = WhileyCore.getWhileyRuntimeJar();
+				IPath wyrtPath = wyclipse.Activator.WHILEY_RUNTIME_JAR_IPATH;
 				IClasspathAttribute[] extraAttributes = new IClasspathAttribute[0];
 				IClasspathEntry entry = JavaCore.newLibraryEntry(wyrtPath,
 						null, null, null, extraAttributes, false);
 				entries = new IClasspathEntry[]{entry};
-			} catch(IOException e) {
-				// could find runtime jar, so just leave off the class path
+			} catch(Exception e) {
+				// could not find runtime jar, so just leave off the class path
 				entries = new IClasspathEntry[0];
 			} 
 		}

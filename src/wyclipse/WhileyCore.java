@@ -63,23 +63,4 @@ public class WhileyCore {
         newEntries[oldEntries.length] = containerEntry;
         javaProject.setRawClasspath(newEntries, null);
     }
-
-	/**
-	 * Find the location of the Whiley Runtime Jar (wyrt.jar). This is shipped
-	 * with wyclipse, so should be located in the lib/ folder of its bundle.
-	 * 
-	 * @return
-	 * @throws IOException
-	 */
-	public static IPath getWhileyRuntimeJar() throws IOException {
-    	Bundle whileyBundle = Platform.getBundle("wyclipse");
-    	URL location = whileyBundle.getEntry("lib/" + WHILEY_RUNTIME_JAR);    	
-    	location = FileLocator.resolve(location);
-    	try {
-    		return URIUtil.toPath(location.toURI());
-    	} catch(URISyntaxException e) {
-    		// should be impossible, right?
-    		return null;
-    	}
-    }
 }
